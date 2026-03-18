@@ -29,69 +29,100 @@
         }
 
         .leaflet-interactive { cursor: pointer; }
+
+        /* CSS สำหรับแบนเนอร์เลื่อน */
+        @keyframes marquee {
+            0% { transform: translateX(100vw); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 35s linear infinite;
+            will-change: transform;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
     </style>
 </head>
-<body class="bg-gray-50 h-screen overflow-hidden flex flex-col md:flex-row relative">
+<body class="bg-gray-50 h-screen overflow-hidden flex flex-col relative">
 
-    <!-- Header / Sidebar -->
-    <div class="bg-white shadow-md z-40 w-full md:w-80 lg:w-96 flex flex-col h-auto md:h-screen shrink-0">
-        <div class="p-4 bg-emerald-600 text-white flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-semibold"><i class="fa-solid fa-truck-ramp-box mr-2"></i>การจัดเก็บขยะ</h1>
-                <p class="text-emerald-100 text-sm">แผนที่เส้นทางและตารางเวลาจัดเก็บ</p>
-            </div>
-            <button id="adminToggle" onclick="requestAdminToggle()" class="bg-emerald-700 hover:bg-emerald-800 p-2 rounded-full text-xs transition">
-                <i class="fa-solid fa-user-lock"></i>
-            </button>
-        </div>
-
-        <div class="p-4 border-b">
-            <div class="relative">
-                <input type="text" id="searchInput" placeholder="ค้นหาสถานที่, ชื่อจุดเก็บ..." 
-                    class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50"
-                    onkeyup="handleSearch()">
-                <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
-            </div>
-        </div>
-
-        <div class="flex-1 overflow-y-auto p-2 hidden md:block" id="locationList">
-            <div class="text-center text-gray-500 py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</div>
-        </div>
-        
-        <!-- แถบสถานะโหมด Admin -->
-        <div id="adminBanner" class="hidden bg-amber-50 border-t border-amber-200 p-3 flex flex-col gap-2">
-            <div class="text-amber-800 text-sm font-medium flex items-center justify-between">
-                <span><i class="fa-solid fa-wrench mr-1"></i> โหมดผู้ดูแล</span>
-                <span id="drawingStatus" class="text-xs bg-amber-200 px-2 py-0.5 rounded-full hidden animate-pulse">กำลังวาดเส้น...</span>
-            </div>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-                <button onclick="setMode('point')" id="btnModePoint" class="py-2 border border-amber-500 bg-amber-500 text-white rounded hover:bg-amber-600 transition">
-                    <i class="fa-solid fa-location-dot"></i> เพิ่มจุด
-                </button>
-                <button onclick="setMode('route')" id="btnModeRoute" class="py-2 border border-blue-500 text-blue-600 rounded hover:bg-blue-50 transition">
-                    <i class="fa-solid fa-route"></i> วาดเส้นทาง
-                </button>
-            </div>
-            <button id="btnFinishRoute" onclick="showRouteForm()" class="hidden py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition text-sm">
-                <i class="fa-solid fa-check"></i> บันทึกเส้นทางนี้
-            </button>
+    <!-- แบนเนอร์ประกาศด้านบนสุด -->
+    <div class="w-full bg-emerald-900 text-base md:text-lg py-3 md:py-4 overflow-hidden flex items-center shrink-0 z-50 shadow-md border-b-2 border-emerald-800 tracking-wide">
+        <div class="animate-marquee cursor-default" id="marqueeContent">
+            <i class="fa-solid fa-spinner fa-spin text-emerald-300 mr-2"></i> <span class="text-emerald-100 font-medium">กำลังโหลดตารางจัดเก็บขยะ...</span>
         </div>
     </div>
 
-    <!-- แผนที่หลัก -->
-    <div class="flex-1 relative h-full">
-        <div id="map" class="w-full h-full"></div>
+    <!-- Wrapper หลักสำหรับ Sidebar และ แผนที่ -->
+    <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative w-full">
 
-        <div id="infoPanel" class="info-panel fixed md:absolute bottom-0 md:bottom-auto md:top-4 md:right-4 w-full md:w-80 bg-white rounded-t-2xl md:rounded-xl shadow-2xl transform translate-y-full md:translate-y-0 md:opacity-0 md:pointer-events-none transition-all duration-300 max-h-[85vh] overflow-y-auto flex flex-col">
-            <!-- ที่จับสำหรับดึงลง (Mobile) -->
-            <div class="w-full flex justify-center pt-3 pb-1 md:hidden" onclick="closePanel()">
-                <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+        <!-- Header / Sidebar -->
+        <div class="bg-white shadow-md z-40 w-full md:w-80 lg:w-96 flex flex-col h-auto md:h-full shrink-0">
+            <!-- หัวเว็บ -->
+            <div class="p-4 bg-emerald-600 text-white flex justify-between items-center shrink-0">
+                <div>
+                    <h1 class="text-xl font-semibold"><i class="fa-solid fa-truck-ramp-box mr-2"></i>ระบบจัดเก็บขยะ</h1>
+                    <p class="text-emerald-100 text-sm">แผนที่เส้นทางและตารางเวลา</p>
+                </div>
+                <button id="adminToggle" onclick="requestAdminToggle()" class="bg-emerald-700 hover:bg-emerald-800 p-2 rounded-full text-xs transition">
+                    <i class="fa-solid fa-user-lock"></i>
+                </button>
+            </div>
+
+            <!-- ช่องค้นหา -->
+            <div class="p-4 border-b shrink-0">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="ค้นหาสถานที่, ชื่อจุดเก็บ..." 
+                        class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-gray-50"
+                        onkeyup="handleSearch()">
+                    <i class="fa-solid fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- รายการสถานที่ด้านซ้าย -->
+            <div class="flex-1 overflow-y-auto p-2 hidden md:block" id="locationList">
+                <div class="text-center text-gray-500 py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i>กำลังโหลดข้อมูล...</div>
             </div>
             
-            <!-- เนื้อหาภายใน -->
-            <div class="p-5 flex-1" id="panelContent"></div>
+            <!-- แถบสถานะโหมด Admin (อยู่ด้านล่างของ Sidebar) -->
+            <div id="adminBanner" class="hidden bg-amber-50 border-t border-amber-200 p-3 flex flex-col gap-2 shrink-0">
+                <div class="text-amber-800 text-sm font-medium flex items-center justify-between">
+                    <span><i class="fa-solid fa-wrench mr-1"></i> โหมดผู้ดูแล</span>
+                    <span id="drawingStatus" class="text-xs bg-amber-200 px-2 py-0.5 rounded-full hidden animate-pulse">กำลังวาดเส้น...</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                    <button onclick="setMode('point')" id="btnModePoint" class="py-2 border border-amber-500 bg-amber-500 text-white rounded hover:bg-amber-600 transition shadow-inner">
+                        <i class="fa-solid fa-location-dot"></i> เพิ่มจุด
+                    </button>
+                    <button onclick="setMode('route')" id="btnModeRoute" class="py-2 border border-blue-500 text-blue-600 bg-white rounded hover:bg-blue-50 transition">
+                        <i class="fa-solid fa-route"></i> วาดเส้นทาง
+                    </button>
+                </div>
+                <button id="btnFinishRoute" onclick="showRouteForm()" class="hidden py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition text-sm">
+                    <i class="fa-solid fa-check"></i> บันทึกเส้นทางนี้
+                </button>
+            </div>
         </div>
-    </div>
+
+        <!-- แผนที่หลัก -->
+        <div class="flex-1 relative h-full">
+            <div id="map" class="w-full h-full"></div>
+
+            <!-- Panel แสดงรายละเอียด (ลอยทับแผนที่) -->
+            <div id="infoPanel" class="info-panel fixed md:absolute bottom-0 md:bottom-auto md:top-4 md:right-4 w-full md:w-80 bg-white rounded-t-2xl md:rounded-xl shadow-2xl transform translate-y-full md:translate-y-0 md:opacity-0 md:pointer-events-none transition-all duration-300 max-h-[85vh] overflow-y-auto flex flex-col">
+                <!-- ที่จับสำหรับดึงลง (Mobile) -->
+                <div class="w-full flex justify-center pt-3 pb-1 md:hidden" onclick="closePanel()">
+                    <div class="w-12 h-1.5 bg-gray-300 rounded-full"></div>
+                </div>
+                
+                <!-- เนื้อหาภายใน -->
+                <div class="p-5 flex-1" id="panelContent"></div>
+            </div>
+        </div>
+
+    </div> <!-- ปิด Wrapper หลัก -->
 
     <!-- Modals -->
     <!-- 1. Password Modal -->
@@ -132,10 +163,10 @@
          * ========================================== */
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxjKS-K3tYte5tpFPKsgdtLpHbx1jqkvdtRFvYxxjiB57rx8ZsIOCZnPnLixPYJ2oruPg/exec"; 
 
-        // การตั้งค่าเซสชัน
+        // การตั้งค่าเซสชัน (3 ชั่วโมง)
         const ADMIN_SESSION_KEY = 'garbage_map_admin_session';
-        const SESSION_HOURS = 3; // ระยะเวลาล็อกอิน (ชั่วโมง)
-        let sessionTimeout; // ตัวแปรเก็บ Timer
+        const SESSION_HOURS = 3; 
+        let sessionTimeout;
 
         // สถานะ
         let map;
@@ -156,6 +187,7 @@
         let tempPolyline = null;
         let itemToDelete = null;
         
+        // ข้อมูลจำลอง
         const mockData = [
             { id: "1", name: "จุดรวมขยะ ซอย 1", lat: 13.7563, lng: 100.5018, schedule: "จันทร์, พุธ, ศุกร์ (08:00)", responsible: "นายสมชาย ใจดี", details: "แยกขยะเปียกและแห้ง" },
             { id: "2", name: "หน้าสวนสาธารณะชุมชน", lat: 13.7580, lng: 100.5040, schedule: "อังคาร, พฤหัส, เสาร์ (09:00)", responsible: "นายมานะ อดทน", details: "มีถังขยะอันตราย" },
@@ -163,15 +195,16 @@
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
-            initMap();             // 1. เลื่อนการสร้างแผนที่ขึ้นมาเป็นอันดับแรกสุด เพื่อเตรียมตัวแปร Layer ต่างๆ ให้พร้อม
-            checkAdminSession();   // 2. ตรวจสอบสถานะล็อกอิน (ถ้าล็อกอินค้างไว้ ระบบจะสั่งอัปเดต UI และวาดแผนที่ได้โดยไม่ Error)
-            loadData();            // 3. โหลดข้อมูลจากฐานข้อมูล
+            initMap();             // 1. สร้างแผนที่และเลเยอร์ก่อน
+            checkAdminSession();   // 2. ตรวจสอบสถานะล็อกอินและอัปเดต UI ถ้ายังไม่หมดอายุ
+            loadData();            // 3. โหลดข้อมูลจาก Google Sheet
         });
 
         function initMap() {
-            map = L.map('map', {zoomControl: false}).setView([13.6969, 100.5054], 15);
+            map = L.map('map', {zoomControl: false}).setView([13.7563, 100.5018], 15);
             L.control.zoom({ position: 'bottomright' }).addTo(map);
 
+            // ใช้ CartoDB เพื่อป้องกันปัญหา 403 Access Blocked ของ OSM
             L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
             }).addTo(map);
@@ -209,10 +242,12 @@
                 } else {
                     showToast("ข้อผิดพลาด: " + result.message, true);
                     renderListUI([]);
+                    updateBanner([]);
                 }
             } catch (error) {
                 showToast("ไม่สามารถเชื่อมต่อฐานข้อมูลได้", true);
                 renderListUI([]);
+                updateBanner([]);
             }
         }
 
@@ -233,7 +268,7 @@
         function highlightFeature(id) {
             if (currentHighlightId === id) return;
 
-            // คืนค่าสีเดิม
+            // 1. คืนค่าสีเดิม
             if (currentHighlightId && layerMap[currentHighlightId]) {
                 const prevLayer = layerMap[currentHighlightId];
                 if (currentHighlightId.toString().startsWith('route_')) {
@@ -246,7 +281,7 @@
 
             currentHighlightId = id;
 
-            // ตั้งค่าสีใหม่ (Highlight)
+            // 2. ตั้งค่าสีใหม่ (Highlight)
             if (id && layerMap[id]) {
                 const layer = layerMap[id];
                 if (id.toString().startsWith('route_')) {
@@ -258,7 +293,7 @@
                 }
             }
 
-            // จัดการ Sidebar List
+            // 3. จัดการ Sidebar List
             document.querySelectorAll('.list-item').forEach(el => {
                 el.classList.remove('border-amber-400', 'bg-amber-50', 'shadow-md');
                 el.classList.add('border-gray-200', 'bg-white');
@@ -273,9 +308,11 @@
         }
 
         /** ==========================================
-         * การแสดงผล (Render)
+         * การแสดงผล (Render) แผนที่, รายการ, และแบนเนอร์
          * ========================================== */
         function renderData(dataToRender = locationsData) {
+            if(!markersGroup || !routesGroup) return; // ป้องกัน Error หาก initMap ยังไม่ทำงาน
+
             markersGroup.clearLayers();
             routesGroup.clearLayers();
             layerMap = {}; 
@@ -290,12 +327,9 @@
                         const coords = JSON.parse(coordsStr);
                         if (Array.isArray(coords) && coords.length > 0) {
                             
-                            // เพิ่ม bubblingMouseEvents: false เพื่อป้องกันการคลิกทะลุไปโดนแผนที่ (ตัวการที่ทำให้หน้าต่างปิด)
+                            // Hit Area: พื้นที่สัมผัสขนาดใหญ่ให้มือถือแตะโดนง่าย ป้องกันคลิกทะลุด้วย bubblingMouseEvents: false
                             const hitArea = L.polyline(coords, { 
-                                color: 'transparent', 
-                                weight: 35, // เพิ่มความหนาของพื้นที่สัมผัสให้แตะง่ายขึ้นบนมือถือ
-                                opacity: 0.01,
-                                bubblingMouseEvents: false 
+                                color: 'transparent', weight: 35, opacity: 0.01, bubblingMouseEvents: false 
                             }).addTo(routesGroup);
                             
                             hitArea.on('click', () => {
@@ -303,11 +337,9 @@
                                 viewDetails(loc.id);
                             });
 
+                            // เส้นทางจริง
                             const polyline = L.polyline(coords, { 
-                                color: '#3b82f6', 
-                                weight: 5, 
-                                opacity: 0.8,
-                                bubblingMouseEvents: false
+                                color: '#3b82f6', weight: 5, opacity: 0.8, bubblingMouseEvents: false 
                             }).addTo(routesGroup);
                             
                             polyline.on('click', () => {
@@ -335,11 +367,15 @@
             if (bounds.isValid() && !currentTempMarker && !isDrawingRoute) {
                 map.fitBounds(bounds, { padding: [50, 50] });
             }
+            
             renderListUI(dataToRender);
+            updateBanner(dataToRender);
         }
 
         function renderListUI(dataToRender = locationsData, isLoading = false) {
             const list = document.getElementById('locationList');
+            if (!list) return;
+
             if (isLoading) {
                 list.innerHTML = '<div class="text-center text-gray-500 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>กำลังโหลด...</div>';
                 return;
@@ -359,7 +395,7 @@
                 
                 item.onclick = () => {
                     if(!isRoute && loc.lat) map.flyTo([loc.lat, loc.lng], 17);
-                    else if(isRoute && layerMap[loc.id]) map.fitBounds(layerMap[loc.id].getBounds());
+                    else if(isRoute && layerMap[loc.id]) map.fitBounds(layerMap[loc.id].getBounds(), { padding: [30, 30], maxZoom: 17 });
                     viewDetails(loc.id);
                 };
                 
@@ -370,6 +406,40 @@
                 `;
                 list.appendChild(item);
             });
+        }
+
+        function updateBanner(dataToRender) {
+            const bannerContent = document.getElementById('marqueeContent');
+            if (!bannerContent) return;
+
+            if (dataToRender.length === 0) {
+                bannerContent.innerHTML = '<span class="mx-4 text-emerald-200">ไม่พบข้อมูลตารางจัดเก็บขยะ</span>';
+                return;
+            }
+
+            let html = '';
+            dataToRender.forEach((loc, index) => {
+                const isRoute = loc.id.toString().startsWith('route_');
+                const icon = isRoute ? '<i class="fa-solid fa-route text-amber-400 mx-1"></i>' : '<i class="fa-solid fa-location-dot text-amber-400 mx-1"></i>';
+                
+                html += `<span class="mx-4 text-emerald-50 cursor-pointer hover:text-white transition" onclick="highlightAndShowDetails('${loc.id}')">${icon} <span class="font-medium">${loc.name}</span> : <span class="text-emerald-200">${loc.schedule}</span></span>`;
+                
+                if (index < dataToRender.length - 1) {
+                    html += `<span class="text-emerald-600 text-[10px] align-middle">●</span>`;
+                }
+            });
+
+            bannerContent.innerHTML = html;
+        }
+
+        // ฟังก์ชันช่วยเหลือสำหรับคลิกแบนเนอร์
+        function highlightAndShowDetails(id) {
+            const loc = locationsData.find(l => l.id == id);
+            if (!loc) return;
+            const isRoute = loc.id.toString().startsWith('route_');
+            if(!isRoute && loc.lat) map.flyTo([loc.lat, loc.lng], 17);
+            else if(isRoute && layerMap[loc.id]) map.fitBounds(layerMap[loc.id].getBounds(), { padding: [30, 30], maxZoom: 17 });
+            viewDetails(loc.id);
         }
 
         /** ==========================================
@@ -493,7 +563,7 @@
                     isAdminMode = true;
                     const timeLeft = expireTime - currentTime;
                     startSessionTimer(timeLeft);
-                    updateAdminUI(); // เพิ่มบรรทัดนี้เพื่อสั่งให้ UI อัปเดตแสดงเมนูแอดมินทันทีเมื่อรีเฟรชหน้า
+                    updateAdminUI(); // อัปเดต UI ทันทีเมื่อรีเฟรชหน้าแล้วยังไม่หมดอายุ
                 } else {
                     // ถ้าหมดเวลาแล้ว ให้ล้างค่าทิ้ง
                     localStorage.removeItem(ADMIN_SESSION_KEY);
@@ -664,7 +734,7 @@
             const title = isNew ? (isRouteMode ? 'บันทึกเส้นทางใหม่' : 'เพิ่มจุดจัดเก็บใหม่') : 'แก้ไขข้อมูล';
             const icon = isRouteMode ? 'fa-route text-blue-500' : 'fa-pen-to-square text-amber-500';
             
-            // ปรับส่วนหัวของฟอร์มให้เป็นระเบียบเช่นกัน
+            // ปรับส่วนหัวของฟอร์มให้เป็นระเบียบ
             const html = `
                 <div class="flex justify-between items-start mb-4 border-b pb-3 border-gray-100">
                     <h2 class="text-lg font-bold text-gray-800 flex items-start flex-1 pr-2 leading-tight">
@@ -747,7 +817,6 @@
             document.getElementById('confirmDeleteBtn').onclick = executeDelete;
         }
 
-        /** ตรวจสอบระบบลบข้อมูล (แก้ไขใหม่ให้รัดกุมขึ้น) */
         async function executeDelete() {
             if(!itemToDelete) return;
             closeModal('confirmModal'); 
