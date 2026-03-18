@@ -63,8 +63,8 @@
             <!-- หัวเว็บ -->
             <div class="p-4 bg-emerald-600 text-white flex justify-between items-center shrink-0">
                 <div>
-                    <h1 class="text-xl font-semibold"><i class="fa-solid fa-truck-ramp-box mr-2"></i>ระบบจัดเก็บขยะ</h1>
-                    <p class="text-emerald-100 text-sm">แผนที่เส้นทางและตารางเวลา</p>
+                    <h1 class="text-xl font-semibold"><i class="fa-solid fa-truck-ramp-box mr-2"></i>การจัดเก็บขยะ</h1>
+                    <p class="text-emerald-100 text-sm">แผนที่เส้นทางและตารางเวลาจัดเก็บ</p>
                 </div>
                 <button id="adminToggle" onclick="requestAdminToggle()" class="bg-emerald-700 hover:bg-emerald-800 p-2 rounded-full text-xs transition">
                     <i class="fa-solid fa-user-lock"></i>
@@ -129,7 +129,7 @@
     <div id="passwordModal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center backdrop-blur-sm transition-opacity">
         <div class="bg-white p-6 rounded-xl w-80 shadow-2xl transform scale-95 transition-transform">
             <h3 class="text-lg font-bold mb-2 text-gray-800"><i class="fa-solid fa-lock text-emerald-600 mr-2"></i>ผู้ดูแลระบบ</h3>
-            <p class="text-xs text-gray-500 mb-4">ระบบตรวจสอบรหัสผ่านเชื่อมต่อกับ Google Sheet โดยตรง</p>
+            <p class="text-xs text-gray-500 mb-4">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ</p>
             <input type="password" id="adminPassword" class="w-full border p-2 rounded-lg mb-4 focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50" placeholder="รหัสผ่าน">
             <div class="flex justify-end gap-2">
                 <button onclick="closeModal('passwordModal')" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200">ยกเลิก</button>
