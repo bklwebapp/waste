@@ -110,6 +110,11 @@
         <div class="flex-1 relative h-full">
             <div id="map" class="w-full h-full"></div>
 
+            <!-- ปุ่มระบุตำแหน่งของฉัน (เพิ่มใหม่) -->
+            <button onclick="locateUser()" class="absolute bottom-[90px] right-[10px] z-[400] bg-white border-2 border-gray-400/20 shadow-[0_1px_5px_rgba(0,0,0,0.4)] rounded-md text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition w-[34px] h-[34px] flex items-center justify-center group" title="ตำแหน่งของฉัน">
+                <i class="fa-solid fa-location-crosshairs text-lg group-hover:scale-110 transition-transform"></i>
+            </button>
+
             <!-- Panel แสดงรายละเอียด (ลอยทับแผนที่) -->
             <div id="infoPanel" class="info-panel fixed md:absolute bottom-0 md:bottom-auto md:top-4 md:right-4 w-full md:w-80 bg-white rounded-t-2xl md:rounded-xl shadow-2xl transform translate-y-full md:translate-y-0 md:opacity-0 md:pointer-events-none transition-all duration-300 max-h-[85vh] overflow-y-auto flex flex-col">
                 <!-- ที่จับสำหรับดึงลง (Mobile) -->
@@ -129,7 +134,7 @@
     <div id="passwordModal" class="fixed inset-0 bg-black/60 hidden z-[100] flex items-center justify-center backdrop-blur-sm transition-opacity">
         <div class="bg-white p-6 rounded-xl w-80 shadow-2xl transform scale-95 transition-transform">
             <h3 class="text-lg font-bold mb-2 text-gray-800"><i class="fa-solid fa-lock text-emerald-600 mr-2"></i>ผู้ดูแลระบบ</h3>
-            <p class="text-xs text-gray-500 mb-4">กรุณากรอกรหัสผ่านเพื่อเข้าสู่ระบบ</p>
+            <p class="text-xs text-gray-500 mb-4">กรุณาใส่รหัสผ่านเพื่อเข้าสู่ระบบ</p>
             <input type="password" id="adminPassword" class="w-full border p-2 rounded-lg mb-4 focus:ring-2 focus:ring-emerald-500 outline-none bg-gray-50" placeholder="รหัสผ่าน">
             <div class="flex justify-end gap-2">
                 <button onclick="closeModal('passwordModal')" class="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm hover:bg-gray-200">ยกเลิก</button>
@@ -178,6 +183,10 @@
         // ตัวแปรเก็บเลเยอร์บนแผนที่สำหรับระบบ Highlight
         let layerMap = {}; 
         let currentHighlightId = null; 
+
+        // ตัวแปรเก็บตำแหน่งผู้ใช้ (เพิ่มใหม่)
+        let userMarker = null;
+        let userCircle = null;
 
         // สถานะการวาดเส้นทาง
         let adminAction = 'point'; 
@@ -851,6 +860,58 @@
             const query = document.getElementById('searchInput').value.toLowerCase();
             const filtered = locationsData.filter(loc => loc.name.toLowerCase().includes(query) || loc.schedule.toLowerCase().includes(query));
             renderData(filtered);
+        }
+
+        // ระบบระบุตำแหน่งผู้ใช้และวาดรัศมี 100 เมตร (เพิ่มใหม่)
+        function locateUser() {
+            if (!navigator.geolocation) {
+                showToast("เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง", true);
+                return;
+            }
+            
+            showToast("กำลังค้นหาตำแหน่งของคุณ...");
+            
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const radius = 100; // รัศมี 100 เมตร
+
+                    // ลบของเก่าออกถ้ามีการระบุตำแหน่งซ้ำ
+                    if (userMarker) map.removeLayer(userMarker);
+                    if (userCircle) map.removeLayer(userCircle);
+
+                    // 1. สร้างหมุดผู้ใช้ (วงกลมสีฟ้ากระพริบ)
+                    const userIcon = L.divIcon({
+                        className: 'custom-user-icon',
+                        html: `<div class="w-4 h-4 bg-blue-500 border-2 border-white rounded-full shadow-[0_0_10px_rgba(59,130,246,0.8)] animate-pulse"></div>`,
+                        iconSize: [16, 16],
+                        iconAnchor: [8, 8]
+                    });
+
+                    userMarker = L.marker([lat, lng], {icon: userIcon, zIndexOffset: 1000}).addTo(map);
+                    userMarker.bindPopup('<div class="text-sm font-medium text-blue-600">ตำแหน่งปัจจุบันของคุณ</div>');
+
+                    // 2. สร้างรัศมีวงกลม 100 เมตร
+                    userCircle = L.circle([lat, lng], {
+                        color: '#3b82f6',
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.15,
+                        weight: 2,
+                        radius: radius
+                    }).addTo(map);
+
+                    // ซูมและเลื่อนกล้องไปที่ตำแหน่งผู้ใช้
+                    map.flyTo([lat, lng], 16);
+                    showToast("ระบุตำแหน่งสำเร็จ");
+                },
+                (error) => {
+                    let msg = "ไม่สามารถระบุตำแหน่งได้";
+                    if(error.code === 1) msg = "กรุณาอนุญาตการเข้าถึงตำแหน่งที่ตั้ง (Location Permission) ในเบราว์เซอร์ของคุณ";
+                    showToast(msg, true);
+                },
+                { enableHighAccuracy: true }
+            );
         }
 
         function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
