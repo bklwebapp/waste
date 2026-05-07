@@ -439,13 +439,46 @@
             if (siteStats.history.length === 0) {
                 histHtml = '<div class="p-4 text-center text-gray-500 text-xs">ยังไม่มีข้อมูลประวัติย้อนหลัง</div>';
             } else {
+                const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+                let monthlyStats = {};
+
+                // จัดกลุ่มประวัติการเข้าชมแบบรายเดือน
                 siteStats.history.forEach(h => {
-                    histHtml += `
-                    <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 text-sm hover:bg-blue-50/50 transition">
-                        <span class="text-gray-600"><i class="fa-regular fa-calendar-days mr-2 text-blue-400"></i>${h.date}</span>
-                        <span class="font-bold text-gray-800 bg-gray-100 px-3 py-1 rounded-full text-xs">${h.count} วิว</span>
-                    </div>`;
+                    // ลบข้อความในวงเล็บทิ้ง ป้องกันเบราว์เซอร์บางตัวอ่านเวลาภาษาไทยไม่ออก (เช่น "(เวลาอินโดจีน)")
+                    let cleanDateStr = String(h.date).replace(/\(.*?\)/g, "").trim(); 
+                    let d = new Date(cleanDateStr);
+                    
+                    if (!isNaN(d.getTime())) {
+                        let m = d.getMonth();
+                        let y = d.getFullYear();
+                        let thaiYear = y + 543; // แปลง ค.ศ. เป็น พ.ศ.
+                        
+                        // ใช้ YYYY-MM เป็น Key เพื่อให้เรียงลำดับจากใหม่ไปเก่าได้แม่นยำ
+                        let sortKey = `${y}-${String(m).padStart(2, '0')}`;
+                        let displayLabel = `${thaiMonths[m]} ${thaiYear}`;
+
+                        if (!monthlyStats[sortKey]) {
+                            monthlyStats[sortKey] = { label: displayLabel, count: 0 };
+                        }
+                        monthlyStats[sortKey].count += Number(h.count) || 0; // รวมยอดวิวของเดือนนี้
+                    }
                 });
+
+                // ดึง Key ออกมาจัดเรียงจากเดือนล่าสุด ไปอดีต
+                let sortedMonths = Object.keys(monthlyStats).sort().reverse();
+
+                if (sortedMonths.length === 0) {
+                    histHtml = '<div class="p-4 text-center text-gray-500 text-xs">รูปแบบข้อมูลวันที่ไม่ถูกต้อง</div>';
+                } else {
+                    sortedMonths.forEach(key => {
+                        let item = monthlyStats[key];
+                        histHtml += `
+                        <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 text-sm hover:bg-blue-50/50 transition">
+                            <span class="text-gray-600"><i class="fa-regular fa-calendar-days mr-2 text-blue-400"></i>${item.label}</span>
+                            <span class="font-bold text-gray-800 bg-gray-100 px-3 py-1 rounded-full text-xs">${item.count} วิว</span>
+                        </div>`;
+                    });
+                }
             }
             document.getElementById('statHistory').innerHTML = histHtml;
             document.getElementById('statsModal').classList.remove('hidden');
