@@ -432,39 +432,52 @@
         }
 
         function openStatsModal() {
-            document.getElementById('statToday').innerText = siteStats.today;
-            document.getElementById('statTotal').innerText = siteStats.total;
-            
+            const todayStr = getThailandDateString();
+            let actualTodayCount = 0;
             let histHtml = '';
+
             if (siteStats.history.length === 0) {
+                document.getElementById('statToday').innerText = siteStats.today;
                 histHtml = '<div class="p-4 text-center text-gray-500 text-xs">ยังไม่มีข้อมูลประวัติย้อนหลัง</div>';
             } else {
                 const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
                 let monthlyStats = {};
 
-                // จัดกลุ่มประวัติการเข้าชมแบบรายเดือน
+                // จัดกลุ่มประวัติการเข้าชมแบบรายเดือน และคำนวณยอดวันนี้ใหม่ให้แม่นยำ
                 siteStats.history.forEach(h => {
-                    // ลบข้อความในวงเล็บทิ้ง ป้องกันเบราว์เซอร์บางตัวอ่านเวลาภาษาไทยไม่ออก (เช่น "(เวลาอินโดจีน)")
+                    // ลบข้อความในวงเล็บทิ้ง ป้องกันเบราว์เซอร์อ่านไม่ออก
                     let cleanDateStr = String(h.date).replace(/\(.*?\)/g, "").trim(); 
                     let d = new Date(cleanDateStr);
+                    let countVal = Number(h.count) || 0;
                     
                     if (!isNaN(d.getTime())) {
-                        let m = d.getMonth();
-                        let y = d.getFullYear();
+                        // ปรับให้เป็นเวลาไทยเพื่อเช็คว่าเป็น "วันนี้" หรือไม่
+                        const bkkTime = new Date(d.toLocaleString("en-US", {timeZone: "Asia/Bangkok"}));
+                        const entryDateStr = bkkTime.getFullYear() + '-' + String(bkkTime.getMonth() + 1).padStart(2, '0') + '-' + String(bkkTime.getDate()).padStart(2, '0');
+                        
+                        // ถ้าตรงกับวันนี้ ให้บวกยอดเพิ่มเข้าไปที่เข้าชมวันนี้
+                        if (entryDateStr === todayStr) {
+                            actualTodayCount += countVal;
+                        }
+
+                        let m = bkkTime.getMonth();
+                        let y = bkkTime.getFullYear();
                         let thaiYear = y + 543; // แปลง ค.ศ. เป็น พ.ศ.
                         
-                        // ใช้ YYYY-MM เป็น Key เพื่อให้เรียงลำดับจากใหม่ไปเก่าได้แม่นยำ
+                        // ใช้ YYYY-MM เป็น Key เพื่อให้เรียงลำดับจากใหม่ไปเก่าได้
                         let sortKey = `${y}-${String(m).padStart(2, '0')}`;
                         let displayLabel = `${thaiMonths[m]} ${thaiYear}`;
 
                         if (!monthlyStats[sortKey]) {
                             monthlyStats[sortKey] = { label: displayLabel, count: 0 };
                         }
-                        monthlyStats[sortKey].count += Number(h.count) || 0; // รวมยอดวิวของเดือนนี้
+                        monthlyStats[sortKey].count += countVal; 
+                    } else {
+                        // Fallback กรณีแปลงวันที่ไม่ได้ แต่ข้อความตรงกับวันนี้
+                        if (String(h.date).includes(todayStr)) actualTodayCount += countVal;
                     }
                 });
 
-                // ดึง Key ออกมาจัดเรียงจากเดือนล่าสุด ไปอดีต
                 let sortedMonths = Object.keys(monthlyStats).sort().reverse();
 
                 if (sortedMonths.length === 0) {
@@ -479,7 +492,12 @@
                         </div>`;
                     });
                 }
+                
+                // ใช้ตัวเลขที่คำนวณได้อย่างแม่นยำมาแสดงผลเป็น "ยอดวันนี้"
+                document.getElementById('statToday').innerText = actualTodayCount > 0 ? actualTodayCount : siteStats.today;
             }
+            
+            document.getElementById('statTotal').innerText = siteStats.total;
             document.getElementById('statHistory').innerHTML = histHtml;
             document.getElementById('statsModal').classList.remove('hidden');
         }
