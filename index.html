@@ -51,6 +51,71 @@
         /* ซ่อน Scrollbar ในสไลด์ป๊อปอัพ */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* ปุ่มลอย Feedback */
+        .feedback-float-btn {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 900;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(99,102,241,0.45), 0 0 0 0 rgba(99,102,241,0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: feedbackPulse 2.5s infinite;
+        }
+        .feedback-float-btn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 6px 25px rgba(99,102,241,0.55);
+            animation: none;
+        }
+        @keyframes feedbackPulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(99,102,241,0.45), 0 0 0 0 rgba(99,102,241,0.4); }
+            50% { box-shadow: 0 4px 15px rgba(99,102,241,0.45), 0 0 0 10px rgba(99,102,241,0); }
+        }
+        .feedback-float-btn .feedback-tooltip {
+            position: absolute;
+            left: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #1e1b4b;
+            color: #e0e7ff;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            font-family: 'Kanit', sans-serif;
+        }
+        .feedback-float-btn:hover .feedback-tooltip { opacity: 1; }
+
+        /* Feedback star rating */
+        .star-rating { display: flex; gap: 4px; direction: rtl; justify-content: center; }
+        .star-rating input { display: none; }
+        .star-rating label { cursor: pointer; font-size: 28px; color: #d1d5db; transition: color 0.15s, transform 0.15s; }
+        .star-rating label:hover, .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label { color: #f59e0b; transform: scale(1.15); }
+
+        /* Feedback card */
+        .feedback-card {
+            border-left: 4px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .feedback-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
     </style>
 </head>
 <body class="bg-gray-50 h-screen overflow-hidden flex flex-col relative">
@@ -129,6 +194,11 @@
                         <i class="fa-solid fa-chart-line"></i> สถิติผู้เข้าชม
                     </button>
                 </div>
+                <div class="grid grid-cols-1 gap-2 text-xs">
+                    <button onclick="openFeedbackAdmin()" class="w-full py-2 bg-white border border-indigo-400 text-indigo-600 rounded hover:bg-indigo-50 transition font-medium shadow-sm">
+                        <i class="fa-solid fa-inbox"></i> ดูข้อเสนอแนะ <span id="feedbackBadge" class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1 hidden">0</span>
+                    </button>
+                </div>
                 <button id="btnFinishRoute" onclick="showRouteForm()" class="hidden py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition text-sm shadow mt-1">
                     <i class="fa-solid fa-check"></i> บันทึกเส้นทางนี้
                 </button>
@@ -140,6 +210,12 @@
             <div id="map" class="w-full h-full"></div>
             <button id="btnLocateUser" onclick="locateUser()" class="absolute bottom-[90px] right-[10px] z-[400] bg-white border border-gray-300 shadow-[0_2px_8px_rgba(0,0,0,0.2)] rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition w-[36px] h-[36px] flex items-center justify-center group" title="ตำแหน่งของฉัน">
                 <i class="fa-solid fa-location-crosshairs text-lg group-hover:scale-110 transition-transform"></i>
+            </button>
+
+            <!-- ปุ่มลอยส่งข้อเสนอแนะ -->
+            <button id="btnFeedbackFloat" class="feedback-float-btn" onclick="openFeedbackModal()" title="ส่งข้อเสนอแนะ">
+                <i class="fa-solid fa-comment-dots"></i>
+                <span class="feedback-tooltip">ส่งข้อเสนอแนะ / คำติชม</span>
             </button>
             <div id="infoPanel" class="info-panel fixed md:absolute bottom-0 md:bottom-auto md:top-4 md:right-4 w-full md:w-80 bg-white rounded-t-2xl md:rounded-xl shadow-2xl transform translate-y-full md:translate-y-0 md:opacity-0 md:pointer-events-none transition-all duration-300 max-h-[85vh] overflow-y-auto flex flex-col z-[500]">
                 <div class="w-full flex justify-center pt-3 pb-1 md:hidden" onclick="closePanel()"><div class="w-12 h-1.5 bg-gray-300 rounded-full"></div></div>
@@ -331,6 +407,92 @@
         </div>
     </div>
 
+    <!-- Modal ส่งข้อเสนอแนะ (ผู้ใช้ทั่วไป) -->
+    <div id="feedbackModal" class="fixed inset-0 bg-black/60 hidden z-[1000] flex items-center justify-center backdrop-blur-sm p-4 transition-opacity">
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform transition-transform">
+            <div class="p-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex justify-between items-center">
+                <div>
+                    <h3 class="font-bold text-lg"><i class="fa-solid fa-comment-dots mr-2"></i>ส่งข้อเสนอแนะ</h3>
+                    <p class="text-indigo-100 text-xs mt-0.5">ความคิดเห็นของคุณช่วยให้เราพัฒนาได้ดียิ่งขึ้น</p>
+                </div>
+                <button onclick="closeModal('feedbackModal')" class="text-white/80 hover:text-white w-8 h-8 flex justify-center items-center rounded-full hover:bg-white/20 transition"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="submitFeedback(event)" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1.5"><i class="fa-solid fa-user text-indigo-400 mr-1"></i> ชื่อผู้ส่ง <span class="text-gray-400 font-normal text-xs">(ไม่จำเป็น)</span></label>
+                    <input type="text" id="fb_name" placeholder="ชื่อของคุณ หรือ ไม่ระบุชื่อ" class="w-full border border-gray-200 px-4 py-2.5 rounded-xl bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition text-sm">
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1.5"><i class="fa-solid fa-tag text-indigo-400 mr-1"></i> หมวดหมู่ *</label>
+                    <select id="fb_category" required class="w-full border border-gray-200 px-4 py-2.5 rounded-xl bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition text-sm">
+                        <option value="" disabled selected>-- เลือกหมวดหมู่ --</option>
+                        <option value="ข้อเสนอแนะ">💡 ข้อเสนอแนะ</option>
+                        <option value="คำติชม">💬 คำติชม</option>
+                        <option value="แจ้งปัญหา">⚠️ แจ้งปัญหา</option>
+                        <option value="ชมเชย">🌟 ชมเชย</option>
+                        <option value="อื่นๆ">📌 อื่นๆ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-1.5"><i class="fa-solid fa-pen-fancy text-indigo-400 mr-1"></i> ข้อความ *</label>
+                    <textarea id="fb_message" rows="4" required placeholder="พิมพ์ข้อเสนอแนะหรือคำติชมของคุณที่นี่..." class="w-full border border-gray-200 px-4 py-2.5 rounded-xl bg-gray-50 focus:ring-2 focus:ring-indigo-400 focus:border-transparent outline-none transition text-sm resize-none"></textarea>
+                </div>
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2 text-center"><i class="fa-solid fa-star text-amber-400 mr-1"></i> ให้คะแนนความพึงพอใจ</label>
+                    <div class="star-rating flex justify-center">
+                        <input type="radio" name="fb_rating" id="star5" value="5"><label for="star5" title="ดีมาก">★</label>
+                        <input type="radio" name="fb_rating" id="star4" value="4"><label for="star4" title="ดี">★</label>
+                        <input type="radio" name="fb_rating" id="star3" value="3" checked><label for="star3" title="ปานกลาง">★</label>
+                        <input type="radio" name="fb_rating" id="star2" value="2"><label for="star2" title="พอใช้">★</label>
+                        <input type="radio" name="fb_rating" id="star1" value="1"><label for="star1" title="ต้องปรับปรุง">★</label>
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModal('feedbackModal')" class="flex-1 px-4 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-sm hover:bg-gray-200 transition font-medium">ยกเลิก</button>
+                    <button type="submit" id="btnSubmitFeedback" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl text-sm hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200 transition font-medium flex items-center justify-center">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> ส่งข้อเสนอแนะ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal ดูข้อเสนอแนะ (Admin) -->
+    <div id="feedbackAdminModal" class="fixed inset-0 bg-black/60 hidden z-[1000] flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl w-full max-w-2xl max-h-[90vh] shadow-2xl flex flex-col overflow-hidden">
+            <div class="p-4 border-b flex justify-between items-center bg-indigo-50 shrink-0">
+                <div>
+                    <h3 class="text-lg font-bold text-indigo-800"><i class="fa-solid fa-inbox mr-2"></i>ข้อเสนอแนะและคำติชม</h3>
+                    <p class="text-xs text-indigo-500 mt-0.5">ข้อความจากผู้ใช้งานทั้งหมด</p>
+                </div>
+                <button onclick="closeModal('feedbackAdminModal')" class="text-gray-500 hover:bg-gray-200 w-8 h-8 rounded-full transition flex justify-center items-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-3 bg-white border-b flex items-center gap-2 shrink-0">
+                <div class="flex-1 relative">
+                    <input type="text" id="feedbackSearchInput" placeholder="ค้นหาข้อความ..." class="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-400 outline-none bg-gray-50 transition" onkeyup="renderFeedbackList()">
+                    <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400 text-sm"></i>
+                </div>
+                <select id="feedbackFilterCategory" class="border rounded-lg px-3 py-2 text-sm bg-gray-50 focus:ring-2 focus:ring-indigo-400 outline-none" onchange="renderFeedbackList()">
+                    <option value="all">ทั้งหมด</option>
+                    <option value="ข้อเสนอแนะ">💡 ข้อเสนอแนะ</option>
+                    <option value="คำติชม">💬 คำติชม</option>
+                    <option value="แจ้งปัญหา">⚠️ แจ้งปัญหา</option>
+                    <option value="ชมเชย">🌟 ชมเชย</option>
+                    <option value="อื่นๆ">📌 อื่นๆ</option>
+                </select>
+            </div>
+            <div class="overflow-y-auto flex-1 p-4 bg-gray-50" id="feedbackListContainer">
+                <div class="text-center text-gray-500 py-10">กำลังโหลด...</div>
+            </div>
+            <div class="p-3 border-t bg-white flex justify-between items-center shrink-0">
+                <div class="text-xs text-gray-500 font-medium" id="feedbackCount">รวม 0 รายการ</div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400">⭐ เฉลี่ย: <span id="feedbackAvgRating" class="font-bold text-amber-600">-</span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast แจ้งเตือน -->
     <div id="toast" class="fixed top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded shadow-lg transform transition-transform duration-300 translate-y-[-150%] z-[40000] flex items-center gap-2">
         <span id="toastMsg"></span>
@@ -348,6 +510,7 @@
         let locationsData = [];
         let popupsData = []; // เก็บข้อมูลป๊อปอัพ
         let siteStats = { total: 0, today: 0, history: [] }; // เก็บข้อมูลสถิติเว็บ
+        let feedbackData = []; // เก็บข้อมูลข้อเสนอแนะ/คำติชม
         let isAdminMode = false;
         
         let layerMap = {}; 
@@ -405,6 +568,14 @@
         const mockPopups = [
             { id: 'p1', imageUrl: 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&q=80&w=800&h=500', dates: todayStr },
             { id: 'p2', imageUrl: 'https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&q=80&w=800&h=500', dates: todayStr + ', 2026-12-31' }
+        ];
+
+        // Mock data สำหรับข้อเสนอแนะ
+        const mockFeedback = [
+            { id: 'fb1', name: 'นายสมศักดิ์', category: 'ข้อเสนอแนะ', message: 'อยากให้เพิ่มจุดทิ้งขยะแถวซอย 5 ครับ เพราะชาวบ้านในซอยต้องเดินไกลมาก', rating: 4, date: todayStr + ' 10:30' },
+            { id: 'fb2', name: 'ไม่ระบุชื่อ', category: 'แจ้งปัญหา', message: 'วันพุธไม่มีรถมาเก็บขยะเลยครับ ทั้งที่ตารางเขียนว่ามี', rating: 2, date: todayStr + ' 08:15' },
+            { id: 'fb3', name: 'คุณแม่บ้าน', category: 'ชมเชย', message: 'ขอบคุณที่ทำแผนที่ขึ้นมาค่ะ สะดวกมากเลย รู้ตารางเวลาล่วงหน้าได้', rating: 5, date: '2026-05-25 14:22' },
+            { id: 'fb4', name: 'ลุงประสิทธิ์', category: 'คำติชม', message: 'เส้นทางรถขยะสาย A ควรเพิ่มรอบช่วงเย็นด้วยครับ ตอนเย็นคนทิ้งขยะเยอะ', rating: 3, date: '2026-05-24 16:45' }
         ];
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -629,6 +800,7 @@
                     locationsData = mockData; 
                     popupsData = mockPopups;
                     siteStats = { total: 1250, today: 42, history: [{date: todayStr, count: 42}, {date: '2026-05-06', count: 105}, {date: '2026-05-05', count: 88}] }; // ข้อมูลสถิติจำลอง
+                    feedbackData = mockFeedback; // ข้อมูลข้อเสนอแนะจำลอง
                     renderData(); 
                     
                     checkAndShowDailyPopups();
@@ -643,6 +815,8 @@
                     locationsData = result.data; 
                     popupsData = result.popups || [];
                     siteStats = result.stats || { total: 0, today: 0, history: [] }; // ดึงข้อมูลสถิติ
+                    feedbackData = result.feedbacks || []; // ดึงข้อมูลข้อเสนอแนะ
+                    updateFeedbackBadge();
                     renderData(); 
                     
                     checkAndShowDailyPopups();
@@ -1438,6 +1612,177 @@
         }
         
         document.getElementById('adminPassword').addEventListener('keypress', function (e) { if (e.key === 'Enter') verifyPassword(); });
+
+        // ======================= ระบบข้อเสนอแนะและคำติชม =======================
+
+        function openFeedbackModal() {
+            // Reset form
+            document.getElementById('fb_name').value = '';
+            document.getElementById('fb_category').selectedIndex = 0;
+            document.getElementById('fb_message').value = '';
+            document.getElementById('star3').checked = true; // default 3 stars
+            document.getElementById('feedbackModal').classList.remove('hidden');
+        }
+
+        async function submitFeedback(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnSubmitFeedback');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> กำลังส่ง...';
+            btn.disabled = true;
+
+            const ratingEl = document.querySelector('input[name="fb_rating"]:checked');
+            const payload = {
+                action: 'save_feedback',
+                id: 'fb_' + Date.now(),
+                name: document.getElementById('fb_name').value.trim() || 'ไม่ระบุชื่อ',
+                category: document.getElementById('fb_category').value,
+                message: document.getElementById('fb_message').value.trim(),
+                rating: ratingEl ? parseInt(ratingEl.value) : 3,
+                date: getThailandDateString() + ' ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' })
+            };
+
+            if (!GAS_URL) {
+                setTimeout(() => {
+                    feedbackData.unshift(payload);
+                    updateFeedbackBadge();
+                    closeModal('feedbackModal');
+                    showFeedbackThankYou();
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> ส่งข้อเสนอแนะ';
+                    btn.disabled = false;
+                }, 800);
+                return;
+            }
+
+            try {
+                await fetch(GAS_URL, {
+                    method: 'POST', mode: 'no-cors', cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                closeModal('feedbackModal');
+                showFeedbackThankYou();
+                setTimeout(async () => { await loadData(); }, 1500);
+            } catch (error) {
+                showToast('เกิดข้อผิดพลาดในการส่งข้อมูล', true);
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane mr-2"></i> ส่งข้อเสนอแนะ';
+                btn.disabled = false;
+            }
+        }
+
+        function showFeedbackThankYou() {
+            showToast('ขอบคุณสำหรับข้อเสนอแนะของคุณ! 🙏');
+        }
+
+        // --- ระบบจัดการข้อเสนอแนะ (Admin) ---
+        function openFeedbackAdmin() {
+            renderFeedbackList();
+            document.getElementById('feedbackAdminModal').classList.remove('hidden');
+        }
+
+        function updateFeedbackBadge() {
+            const badge = document.getElementById('feedbackBadge');
+            if (!badge) return;
+            if (feedbackData.length > 0) {
+                badge.innerText = feedbackData.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderFeedbackList() {
+            const container = document.getElementById('feedbackListContainer');
+            const searchQuery = (document.getElementById('feedbackSearchInput')?.value || '').toLowerCase();
+            const filterCat = document.getElementById('feedbackFilterCategory')?.value || 'all';
+
+            let filtered = feedbackData.filter(fb => {
+                const matchSearch = !searchQuery || 
+                    (fb.name || '').toLowerCase().includes(searchQuery) ||
+                    (fb.message || '').toLowerCase().includes(searchQuery) ||
+                    (fb.category || '').toLowerCase().includes(searchQuery);
+                const matchCat = filterCat === 'all' || fb.category === filterCat;
+                return matchSearch && matchCat;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="text-center text-gray-500 py-10"><i class="fa-regular fa-comment-dots text-4xl mb-3 text-gray-300 block"></i>ยังไม่มีข้อเสนอแนะ</div>';
+                document.getElementById('feedbackCount').innerText = 'รวม 0 รายการ';
+                document.getElementById('feedbackAvgRating').innerText = '-';
+                return;
+            }
+
+            const categoryColors = {
+                'ข้อเสนอแนะ': { border: '#6366f1', bg: '#eef2ff', text: '#4338ca', emoji: '💡' },
+                'คำติชม':     { border: '#0ea5e9', bg: '#f0f9ff', text: '#0369a1', emoji: '💬' },
+                'แจ้งปัญหา':  { border: '#f59e0b', bg: '#fffbeb', text: '#b45309', emoji: '⚠️' },
+                'ชมเชย':      { border: '#10b981', bg: '#ecfdf5', text: '#047857', emoji: '🌟' },
+                'อื่นๆ':      { border: '#6b7280', bg: '#f9fafb', text: '#374151', emoji: '📌' }
+            };
+
+            let html = '';
+            filtered.forEach((fb, idx) => {
+                const cat = categoryColors[fb.category] || categoryColors['อื่นๆ'];
+                const stars = '★'.repeat(fb.rating || 0) + '☆'.repeat(5 - (fb.rating || 0));
+                html += `
+                    <div class="feedback-card bg-white p-4 rounded-xl mb-3 border border-gray-100 shadow-sm" style="border-left-color: ${cat.border}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style="background: ${cat.bg}; color: ${cat.text}">
+                                    ${(fb.name || 'ไม่ระบุ').charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <div class="font-semibold text-gray-800 text-sm">${fb.name || 'ไม่ระบุชื่อ'}</div>
+                                    <div class="text-[11px] text-gray-400"><i class="fa-regular fa-clock mr-1"></i>${fb.date || '-'}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-bold px-2 py-1 rounded-full" style="background: ${cat.bg}; color: ${cat.text}">${cat.emoji} ${fb.category}</span>
+                                <button onclick="promptDeleteFeedback('${fb.id}')" class="text-red-400 hover:text-red-600 hover:bg-red-50 w-7 h-7 rounded flex items-center justify-center transition" title="ลบ"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 text-sm leading-relaxed pl-11 whitespace-pre-line">${fb.message}</p>
+                        <div class="mt-2 pl-11"><span class="text-amber-400 text-sm tracking-widest" title="${fb.rating}/5 คะแนน">${stars}</span></div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            document.getElementById('feedbackCount').innerText = `รวม ${filtered.length} รายการ`;
+
+            // คำนวณค่าเฉลี่ย
+            const totalRating = filtered.reduce((sum, fb) => sum + (fb.rating || 0), 0);
+            const avgRating = (totalRating / filtered.length).toFixed(1);
+            document.getElementById('feedbackAvgRating').innerText = avgRating + ' / 5';
+        }
+
+        function promptDeleteFeedback(id) {
+            itemToDelete = id;
+            isDeletingPopup = false; // reuse for feedback
+            document.getElementById('confirmText').innerText = 'คุณต้องการลบข้อเสนอแนะนี้ใช่หรือไม่?';
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmDeleteBtn').onclick = async function() {
+                closeModal('confirmModal');
+                if (!GAS_URL) {
+                    feedbackData = feedbackData.filter(fb => fb.id != id);
+                    renderFeedbackList();
+                    updateFeedbackBadge();
+                    showToast('ลบข้อเสนอแนะจำลองสำเร็จ');
+                    return;
+                }
+                try {
+                    await fetch(GAS_URL, {
+                        method: 'POST', mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete_feedback', id: id })
+                    });
+                    showToast('ลบข้อเสนอแนะสำเร็จ กำลังอัปเดต...');
+                    setTimeout(async () => { await loadData(); renderFeedbackList(); }, 1500);
+                } catch(e) {
+                    showToast('ลบไม่สำเร็จ กรุณาลองใหม่', true);
+                }
+            };
+        }
     </script>
 </body>
 </html>
