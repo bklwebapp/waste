@@ -1642,6 +1642,7 @@
             };
 
             if (!GAS_URL) {
+                // Mock mode
                 setTimeout(() => {
                     feedbackData.unshift(payload);
                     updateFeedbackBadge();
@@ -1661,7 +1662,8 @@
                 });
                 closeModal('feedbackModal');
                 showFeedbackThankYou();
-                setTimeout(async () => { await loadData(); }, 1500);
+                // โหลดข้อมูลใหม่จาก Google Sheet หลังบันทึก
+                setTimeout(async () => { await loadData(); }, 2000);
             } catch (error) {
                 showToast('เกิดข้อผิดพลาดในการส่งข้อมูล', true);
             } finally {
@@ -1758,18 +1760,22 @@
 
         function promptDeleteFeedback(id) {
             itemToDelete = id;
-            isDeletingPopup = false; // reuse for feedback
+            isDeletingPopup = false;
             document.getElementById('confirmText').innerText = 'คุณต้องการลบข้อเสนอแนะนี้ใช่หรือไม่?';
             document.getElementById('confirmModal').classList.remove('hidden');
             document.getElementById('confirmDeleteBtn').onclick = async function() {
                 closeModal('confirmModal');
+
                 if (!GAS_URL) {
+                    // Mock mode
                     feedbackData = feedbackData.filter(fb => fb.id != id);
                     renderFeedbackList();
                     updateFeedbackBadge();
-                    showToast('ลบข้อเสนอแนะจำลองสำเร็จ');
+                    showToast('ลบข้อเสนอแนะสำเร็จ');
                     return;
                 }
+
+                showToast('กำลังลบข้อเสนอแนะ...');
                 try {
                     await fetch(GAS_URL, {
                         method: 'POST', mode: 'no-cors',
@@ -1777,7 +1783,7 @@
                         body: JSON.stringify({ action: 'delete_feedback', id: id })
                     });
                     showToast('ลบข้อเสนอแนะสำเร็จ กำลังอัปเดต...');
-                    setTimeout(async () => { await loadData(); renderFeedbackList(); }, 1500);
+                    setTimeout(async () => { await loadData(); renderFeedbackList(); updateFeedbackBadge(); }, 2000);
                 } catch(e) {
                     showToast('ลบไม่สำเร็จ กรุณาลองใหม่', true);
                 }
