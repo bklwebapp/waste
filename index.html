@@ -100,6 +100,69 @@
         }
         .feedback-float-btn:hover .feedback-tooltip { opacity: 1; }
 
+        /* ปุ่มลอย Traffy Fondue */
+        .traffy-float-btn {
+            position: fixed;
+            bottom: 88px;
+            left: 24px;
+            z-index: 900;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: #5d4037;
+            color: white;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(93,64,55,0.45), 0 0 0 0 rgba(93,64,55,0.4);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: transform 0.3s, box-shadow 0.3s;
+            animation: traffyPulse 2.5s infinite;
+        }
+        .traffy-float-btn i {
+            font-size: 18px;
+            transform: rotate(-15deg);
+            margin-top: 2px;
+        }
+        .traffy-float-btn span.tf-text {
+            font-size: 10px;
+            font-weight: 700;
+            line-height: 1;
+            margin-top: 2px;
+            font-family: 'Kanit', sans-serif;
+            letter-spacing: -0.5px;
+        }
+        .traffy-float-btn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 6px 25px rgba(93,64,55,0.55);
+            animation: none;
+            color: white;
+        }
+        @keyframes traffyPulse {
+            0%, 100% { box-shadow: 0 4px 15px rgba(93,64,55,0.45), 0 0 0 0 rgba(93,64,55,0.4); }
+            50% { box-shadow: 0 4px 15px rgba(93,64,55,0.45), 0 0 0 10px rgba(93,64,55,0); }
+        }
+        .traffy-float-btn .traffy-tooltip {
+            position: absolute;
+            left: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #4e342e;
+            color: #efebe9;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            font-family: 'Kanit', sans-serif;
+        }
+        .traffy-float-btn:hover .traffy-tooltip { opacity: 1; }
+
         /* Feedback star rating */
         .star-rating { display: flex; gap: 4px; direction: rtl; justify-content: center; }
         .star-rating input { display: none; }
@@ -215,6 +278,13 @@
                 <i class="fa-solid fa-location-crosshairs text-lg group-hover:scale-110 transition-transform"></i>
             </button>
 
+            <!-- ปุ่มลอย Traffy Fondue -->
+            <a href="https://page.line.me/traffyfondue" target="_blank" onclick="logTraffyClick()" id="btnTraffyFloat" class="traffy-float-btn" title="Traffy Fondue">
+                <i class="fa-solid fa-bullhorn"></i>
+                <span class="tf-text">Fondue</span>
+                <span class="traffy-tooltip">แจ้งปัญหาผ่าน Traffy Fondue</span>
+            </a>
+
             <!-- ปุ่มลอยส่งข้อเสนอแนะ -->
             <button id="btnFeedbackFloat" class="feedback-float-btn" onclick="openFeedbackModal()" title="ส่งข้อเสนอแนะ">
                 <i class="fa-solid fa-comment-dots"></i>
@@ -272,13 +342,21 @@
             </div>
             <div class="p-4 bg-gray-50 flex-1 overflow-y-auto">
                 <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm text-center">
+                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
                         <div class="text-gray-500 text-xs font-bold mb-1">เข้าชมวันนี้</div>
-                        <div class="text-4xl font-black text-blue-600" id="statToday">0</div>
+                        <div class="text-3xl font-black text-blue-600" id="statToday">0</div>
                     </div>
-                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm text-center">
+                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
                         <div class="text-gray-500 text-xs font-bold mb-1">เข้าชมทั้งหมด</div>
-                        <div class="text-4xl font-black text-emerald-600" id="statTotal">0</div>
+                        <div class="text-3xl font-black text-emerald-600" id="statTotal">0</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
+                        <div class="text-gray-500 text-[10px] font-bold mb-1">คลิก Traffy วันนี้</div>
+                        <div class="text-2xl font-black text-amber-600" id="statTraffyToday">0</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
+                        <div class="text-gray-500 text-[10px] font-bold mb-1">คลิก Traffy รวม</div>
+                        <div class="text-2xl font-black text-amber-700" id="statTraffyTotal">0</div>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -605,14 +683,27 @@
                 sessionStorage.setItem('garbage_map_visited', 'true');
             } catch(e) {}
         }
+        
+        async function logTraffyClick() {
+            if (!GAS_URL) return; 
+            try {
+                await fetch(GAS_URL, { 
+                    method: 'POST', mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ action: 'log_traffy' }) 
+                });
+            } catch(e) {}
+        }
 
         function openStatsModal() {
             const todayStr = getThailandDateString();
             let actualTodayCount = 0;
+            let actualTraffyToday = 0;
             let histHtml = '';
 
             if (siteStats.history.length === 0) {
-                document.getElementById('statToday').innerText = siteStats.today;
+                document.getElementById('statToday').innerText = siteStats.today || 0;
+                document.getElementById('statTraffyToday').innerText = siteStats.traffyToday || 0;
                 histHtml = '<div class="p-4 text-center text-gray-500 text-xs">ยังไม่มีข้อมูลประวัติย้อนหลัง</div>';
             } else {
                 const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -624,6 +715,7 @@
                     let cleanDateStr = String(h.date).replace(/\(.*?\)/g, "").trim(); 
                     let d = new Date(cleanDateStr);
                     let countVal = Number(h.count) || 0;
+                    let tCountVal = Number(h.traffyCount) || 0;
                     
                     if (!isNaN(d.getTime())) {
                         // ปรับให้เป็นเวลาไทยเพื่อเช็คว่าเป็น "วันนี้" หรือไม่
@@ -633,6 +725,7 @@
                         // ถ้าตรงกับวันนี้ ให้บวกยอดเพิ่มเข้าไปที่เข้าชมวันนี้
                         if (entryDateStr === todayStr) {
                             actualTodayCount += countVal;
+                            actualTraffyToday += tCountVal;
                         }
 
                         let m = bkkTime.getMonth();
@@ -644,12 +737,16 @@
                         let displayLabel = `${thaiMonths[m]} ${thaiYear}`;
 
                         if (!monthlyStats[sortKey]) {
-                            monthlyStats[sortKey] = { label: displayLabel, count: 0 };
+                            monthlyStats[sortKey] = { label: displayLabel, count: 0, traffyCount: 0 };
                         }
                         monthlyStats[sortKey].count += countVal; 
+                        monthlyStats[sortKey].traffyCount += tCountVal; 
                     } else {
                         // Fallback กรณีแปลงวันที่ไม่ได้ แต่ข้อความตรงกับวันนี้
-                        if (String(h.date).includes(todayStr)) actualTodayCount += countVal;
+                        if (String(h.date).includes(todayStr)) {
+                            actualTodayCount += countVal;
+                            actualTraffyToday += tCountVal;
+                        }
                     }
                 });
 
@@ -663,16 +760,21 @@
                         histHtml += `
                         <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 text-sm hover:bg-blue-50/50 transition">
                             <span class="text-gray-600"><i class="fa-regular fa-calendar-days mr-2 text-blue-400"></i>${item.label}</span>
-                            <span class="font-bold text-gray-800 bg-gray-100 px-3 py-1 rounded-full text-xs">${item.count} วิว</span>
+                            <div class="text-right">
+                                <span class="font-bold text-gray-800 bg-gray-100 px-2 py-0.5 rounded-full text-xs mr-1">${item.count} วิว</span>
+                                <span class="font-bold text-amber-800 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full text-[10px]">Traffy ${item.traffyCount}</span>
+                            </div>
                         </div>`;
                     });
                 }
                 
                 // ใช้ตัวเลขที่คำนวณได้อย่างแม่นยำมาแสดงผลเป็น "ยอดวันนี้"
-                document.getElementById('statToday').innerText = actualTodayCount > 0 ? actualTodayCount : siteStats.today;
+                document.getElementById('statToday').innerText = actualTodayCount > 0 ? actualTodayCount : (siteStats.today || 0);
+                document.getElementById('statTraffyToday').innerText = actualTraffyToday > 0 ? actualTraffyToday : (siteStats.traffyToday || 0);
             }
             
-            document.getElementById('statTotal').innerText = siteStats.total;
+            document.getElementById('statTotal').innerText = siteStats.total || 0;
+            document.getElementById('statTraffyTotal').innerText = siteStats.traffyTotal || 0;
             document.getElementById('statHistory').innerHTML = histHtml;
             document.getElementById('statsModal').classList.remove('hidden');
         }
