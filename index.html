@@ -100,69 +100,6 @@
         }
         .feedback-float-btn:hover .feedback-tooltip { opacity: 1; }
 
-        /* ปุ่มลอย Traffy Fondue */
-        .traffy-float-btn {
-            position: fixed;
-            bottom: 88px;
-            left: 24px;
-            z-index: 900;
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background: #5d4037;
-            color: white;
-            border: 2px solid #ffffff;
-            box-shadow: 0 4px 15px rgba(93,64,55,0.45), 0 0 0 0 rgba(93,64,55,0.4);
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            transition: transform 0.3s, box-shadow 0.3s;
-            animation: traffyPulse 2.5s infinite;
-        }
-        .traffy-float-btn i {
-            font-size: 18px;
-            transform: rotate(-15deg);
-            margin-top: 2px;
-        }
-        .traffy-float-btn span.tf-text {
-            font-size: 10px;
-            font-weight: 700;
-            line-height: 1;
-            margin-top: 2px;
-            font-family: 'Kanit', sans-serif;
-            letter-spacing: -0.5px;
-        }
-        .traffy-float-btn:hover {
-            transform: scale(1.12);
-            box-shadow: 0 6px 25px rgba(93,64,55,0.55);
-            animation: none;
-            color: white;
-        }
-        @keyframes traffyPulse {
-            0%, 100% { box-shadow: 0 4px 15px rgba(93,64,55,0.45), 0 0 0 0 rgba(93,64,55,0.4); }
-            50% { box-shadow: 0 4px 15px rgba(93,64,55,0.45), 0 0 0 10px rgba(93,64,55,0); }
-        }
-        .traffy-float-btn .traffy-tooltip {
-            position: absolute;
-            left: 60px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #4e342e;
-            color: #efebe9;
-            font-size: 12px;
-            padding: 6px 12px;
-            border-radius: 8px;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            font-family: 'Kanit', sans-serif;
-        }
-        .traffy-float-btn:hover .traffy-tooltip { opacity: 1; }
-
         /* Feedback star rating */
         .star-rating { display: flex; gap: 4px; direction: rtl; justify-content: center; }
         .star-rating input { display: none; }
@@ -240,15 +177,18 @@
                     <span><i class="fa-solid fa-wrench mr-1"></i> โหมดผู้ดูแล <span class="text-xs font-normal text-amber-600">(แตะ <i class="fa-solid fa-grip-vertical mx-1"></i> เพื่อลาก)</span></span>
                     <span id="drawingStatus" class="text-xs bg-amber-200 px-2 py-0.5 rounded-full hidden animate-pulse">กำลังวาดเส้น...</span>
                 </div>
-                <div class="grid grid-cols-3 gap-1.5 text-xs mb-1">
+                <div class="grid grid-cols-4 gap-1 text-[11px] mb-1">
                     <button onclick="setMode('point')" id="btnModePoint" class="py-2 px-1 border border-amber-500 bg-amber-500 text-white rounded hover:bg-amber-600 transition shadow-inner flex items-center justify-center gap-1" title="เพิ่มจุดเก็บขยะ">
                         <i class="fa-solid fa-location-dot"></i> <span class="truncate">เพิ่มจุด</span>
                     </button>
                     <button onclick="setMode('transfer')" id="btnModeTransfer" class="py-2 px-1 border border-purple-500 text-purple-600 bg-white rounded hover:bg-purple-50 transition flex items-center justify-center gap-1" title="เพิ่มจุดพักขยะ">
-                        <i class="fa-solid fa-dumpster"></i> <span class="truncate">เพิ่มจุดพัก</span>
+                        <i class="fa-solid fa-dumpster"></i> <span class="truncate">จุดพัก</span>
+                    </button>
+                    <button onclick="setMode('bin')" id="btnModeBin" class="py-2 px-1 border border-pink-500 text-pink-600 bg-white rounded hover:bg-pink-50 transition flex items-center justify-center gap-1" title="เพิ่มจุดเก็บขยะในหมู่บ้าน">
+                        <div class="w-[1.125em] h-[1.125em] -mt-0.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M7 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><rect x="2" y="5" width="16" height="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h5"/><path d="M7 11v7"/><path d="M10 11v7"/><path d="M13 11v3"/><path d="M16.5 13C14 13 12 15 12 18v1a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-1c0-3-2-5-4.5-5Z"/><path d="M16.5 13 L 14.5 10 C 14.5 8.5 18.5 8.5 18.5 10 Z"/><path d="M15.5 11.5 L 14 13.5"/><path d="M17.5 11.5 L 19 13.5"/></svg></div> <span class="truncate">ถังขยะ</span>
                     </button>
                     <button onclick="setMode('route')" id="btnModeRoute" class="py-2 px-1 border border-blue-500 text-blue-600 bg-white rounded hover:bg-blue-50 transition flex items-center justify-center gap-1" title="วาดเส้นทางรถเก็บขยะ">
-                        <i class="fa-solid fa-route"></i> <span class="truncate">วาดเส้นทาง</span>
+                        <i class="fa-solid fa-route"></i> <span class="truncate">เส้นทาง</span>
                     </button>
                 </div>
                 <!-- เปลี่ยนเลย์เอาต์ปุ่มแอดมินให้จัดการป๊อปอัพและดูสถิติได้คู่กัน -->
@@ -277,13 +217,6 @@
             <button id="btnLocateUser" onclick="locateUser()" class="absolute bottom-[90px] right-[10px] z-[400] bg-white border border-gray-300 shadow-[0_2px_8px_rgba(0,0,0,0.2)] rounded-md text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition w-[36px] h-[36px] flex items-center justify-center group" title="ตำแหน่งของฉัน">
                 <i class="fa-solid fa-location-crosshairs text-lg group-hover:scale-110 transition-transform"></i>
             </button>
-
-            <!-- ปุ่มลอย Traffy Fondue -->
-            <a href="https://page.line.me/traffyfondue" target="_blank" onclick="logTraffyClick()" id="btnTraffyFloat" class="traffy-float-btn" title="Traffy Fondue">
-                <i class="fa-solid fa-bullhorn"></i>
-                <span class="tf-text">Fondue</span>
-                <span class="traffy-tooltip">แจ้งปัญหาผ่าน Traffy Fondue</span>
-            </a>
 
             <!-- ปุ่มลอยส่งข้อเสนอแนะ -->
             <button id="btnFeedbackFloat" class="feedback-float-btn" onclick="openFeedbackModal()" title="ส่งข้อเสนอแนะ">
@@ -342,21 +275,13 @@
             </div>
             <div class="p-4 bg-gray-50 flex-1 overflow-y-auto">
                 <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm text-center">
                         <div class="text-gray-500 text-xs font-bold mb-1">เข้าชมวันนี้</div>
-                        <div class="text-3xl font-black text-blue-600" id="statToday">0</div>
+                        <div class="text-4xl font-black text-blue-600" id="statToday">0</div>
                     </div>
-                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm text-center">
                         <div class="text-gray-500 text-xs font-bold mb-1">เข้าชมทั้งหมด</div>
-                        <div class="text-3xl font-black text-emerald-600" id="statTotal">0</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
-                        <div class="text-gray-500 text-[10px] font-bold mb-1">คลิก Traffy วันนี้</div>
-                        <div class="text-2xl font-black text-amber-600" id="statTraffyToday">0</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-center">
-                        <div class="text-gray-500 text-[10px] font-bold mb-1">คลิก Traffy รวม</div>
-                        <div class="text-2xl font-black text-amber-700" id="statTraffyTotal">0</div>
+                        <div class="text-4xl font-black text-emerald-600" id="statTotal">0</div>
                     </div>
                 </div>
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
@@ -582,6 +507,7 @@
     <!-- Javascript หลักของระบบ -->
     <script>
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxjKS-K3tYte5tpFPKsgdtLpHbx1jqkvdtRFvYxxjiB57rx8ZsIOCZnPnLixPYJ2oruPg/exec"; 
+        const SVG_BIN_ICON = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M7 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><rect x="2" y="5" width="16" height="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h5"/><path d="M7 11v7"/><path d="M10 11v7"/><path d="M13 11v3"/><path d="M16.5 13C14 13 12 15 12 18v1a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-1c0-3-2-5-4.5-5Z"/><path d="M16.5 13 L 14.5 10 C 14.5 8.5 18.5 8.5 18.5 10 Z"/><path d="M15.5 11.5 L 14 13.5"/><path d="M17.5 11.5 L 19 13.5"/></svg>`; 
 
         const ADMIN_SESSION_KEY = 'garbage_map_admin_session';
         const SESSION_HOURS = 3; 
@@ -683,27 +609,14 @@
                 sessionStorage.setItem('garbage_map_visited', 'true');
             } catch(e) {}
         }
-        
-        async function logTraffyClick() {
-            if (!GAS_URL) return; 
-            try {
-                await fetch(GAS_URL, { 
-                    method: 'POST', mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify({ action: 'log_traffy' }) 
-                });
-            } catch(e) {}
-        }
 
         function openStatsModal() {
             const todayStr = getThailandDateString();
             let actualTodayCount = 0;
-            let actualTraffyToday = 0;
             let histHtml = '';
 
             if (siteStats.history.length === 0) {
-                document.getElementById('statToday').innerText = siteStats.today || 0;
-                document.getElementById('statTraffyToday').innerText = siteStats.traffyToday || 0;
+                document.getElementById('statToday').innerText = siteStats.today;
                 histHtml = '<div class="p-4 text-center text-gray-500 text-xs">ยังไม่มีข้อมูลประวัติย้อนหลัง</div>';
             } else {
                 const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
@@ -715,7 +628,6 @@
                     let cleanDateStr = String(h.date).replace(/\(.*?\)/g, "").trim(); 
                     let d = new Date(cleanDateStr);
                     let countVal = Number(h.count) || 0;
-                    let tCountVal = Number(h.traffyCount) || 0;
                     
                     if (!isNaN(d.getTime())) {
                         // ปรับให้เป็นเวลาไทยเพื่อเช็คว่าเป็น "วันนี้" หรือไม่
@@ -725,7 +637,6 @@
                         // ถ้าตรงกับวันนี้ ให้บวกยอดเพิ่มเข้าไปที่เข้าชมวันนี้
                         if (entryDateStr === todayStr) {
                             actualTodayCount += countVal;
-                            actualTraffyToday += tCountVal;
                         }
 
                         let m = bkkTime.getMonth();
@@ -737,16 +648,12 @@
                         let displayLabel = `${thaiMonths[m]} ${thaiYear}`;
 
                         if (!monthlyStats[sortKey]) {
-                            monthlyStats[sortKey] = { label: displayLabel, count: 0, traffyCount: 0 };
+                            monthlyStats[sortKey] = { label: displayLabel, count: 0 };
                         }
                         monthlyStats[sortKey].count += countVal; 
-                        monthlyStats[sortKey].traffyCount += tCountVal; 
                     } else {
                         // Fallback กรณีแปลงวันที่ไม่ได้ แต่ข้อความตรงกับวันนี้
-                        if (String(h.date).includes(todayStr)) {
-                            actualTodayCount += countVal;
-                            actualTraffyToday += tCountVal;
-                        }
+                        if (String(h.date).includes(todayStr)) actualTodayCount += countVal;
                     }
                 });
 
@@ -760,21 +667,16 @@
                         histHtml += `
                         <div class="flex justify-between items-center p-3 border-b border-gray-100 last:border-0 text-sm hover:bg-blue-50/50 transition">
                             <span class="text-gray-600"><i class="fa-regular fa-calendar-days mr-2 text-blue-400"></i>${item.label}</span>
-                            <div class="text-right">
-                                <span class="font-bold text-gray-800 bg-gray-100 px-2 py-0.5 rounded-full text-xs mr-1">${item.count} วิว</span>
-                                <span class="font-bold text-amber-800 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-full text-[10px]">Traffy ${item.traffyCount}</span>
-                            </div>
+                            <span class="font-bold text-gray-800 bg-gray-100 px-3 py-1 rounded-full text-xs">${item.count} วิว</span>
                         </div>`;
                     });
                 }
                 
                 // ใช้ตัวเลขที่คำนวณได้อย่างแม่นยำมาแสดงผลเป็น "ยอดวันนี้"
-                document.getElementById('statToday').innerText = actualTodayCount > 0 ? actualTodayCount : (siteStats.today || 0);
-                document.getElementById('statTraffyToday').innerText = actualTraffyToday > 0 ? actualTraffyToday : (siteStats.traffyToday || 0);
+                document.getElementById('statToday').innerText = actualTodayCount > 0 ? actualTodayCount : siteStats.today;
             }
             
-            document.getElementById('statTotal').innerText = siteStats.total || 0;
-            document.getElementById('statTraffyTotal').innerText = siteStats.traffyTotal || 0;
+            document.getElementById('statTotal').innerText = siteStats.total;
             document.getElementById('statHistory').innerHTML = histHtml;
             document.getElementById('statsModal').classList.remove('hidden');
         }
@@ -895,6 +797,7 @@
                 if (!isAdminMode) { closePanel(); return; }
                 if (adminAction === 'point') showPointForm(e.latlng.lat, e.latlng.lng, false);
                 else if (adminAction === 'transfer') showPointForm(e.latlng.lat, e.latlng.lng, true);
+                else if (adminAction === 'bin') showPointForm(e.latlng.lat, e.latlng.lng, false, true);
                 else if (adminAction === 'route') addRoutePoint(e.latlng);
             });
         }
@@ -1151,8 +1054,9 @@
             locationsData.forEach(loc => {
                 const isRoute = loc.id.toString().startsWith('route_');
                 const isTransfer = loc.id.toString().startsWith('transfer_');
-                const routeColor = isRoute ? (routeColorMap[loc.id] || '#3b82f6') : (isTransfer ? '#9333ea' : '#10b981');
-                const icon = isRoute ? `<i class="fa-solid fa-route" style="color: ${routeColor}" title="เส้นทาง"></i>` : (isTransfer ? `<i class="fa-solid fa-dumpster text-purple-600" title="จุดพักขยะ"></i>` : `<i class="fa-solid fa-trash-can text-emerald-500" title="จุดจัดเก็บ"></i>`);
+                const isBin = loc.id.toString().startsWith('bin_');
+                const routeColor = isRoute ? (routeColorMap[loc.id] || '#3b82f6') : (isTransfer ? '#9333ea' : (isBin ? '#ec4899' : '#10b981'));
+                const icon = isRoute ? `<i class="fa-solid fa-route" style="color: ${routeColor}" title="เส้นทาง"></i>` : (isTransfer ? `<i class="fa-solid fa-dumpster text-purple-600" title="จุดพักขยะ"></i>` : (isBin ? `<div class="w-4 h-4 text-pink-500 inline-block align-middle mb-0.5" title="จุดในหมู่บ้าน">${SVG_BIN_ICON}</div>` : `<i class="fa-solid fa-trash-can text-emerald-500" title="จุดจัดเก็บ"></i>`));
                 html += `<tr class="border-b hover:bg-gray-50 transition">
                         <td class="p-3 text-center text-lg">${icon}</td><td class="p-3 font-medium text-gray-800">${getDisplayName(loc.name)}</td>
                         <td class="p-3 text-emerald-600">${loc.schedule || '-'}</td><td class="p-3 text-gray-600">${loc.responsible || '-'}</td>
@@ -1187,9 +1091,17 @@
             document.getElementById('confirmDeleteBtn').onclick = executeDelete; 
         }
 
-        function createIcon(isHighlight = false, isTransfer = false) {
-            const bgClass = isHighlight ? 'w-10 h-10 !bg-amber-500 !border-[3px] shadow-[0_0_15px_rgba(245,158,11,0.6)] z-50' : (isTransfer ? 'w-8 h-8 !bg-purple-600' : 'w-8 h-8');
-            const symbol = isTransfer ? '<i class="fa-solid fa-dumpster"></i>' : '<i class="fa-solid fa-trash-can"></i>';
+        function createIcon(isHighlight = false, isTransfer = false, isBin = false) {
+            let bgClass = isHighlight ? 'w-10 h-10 !bg-amber-500 !border-[3px] shadow-[0_0_15px_rgba(245,158,11,0.6)] z-50' : 'w-8 h-8';
+            let symbol = '<i class="fa-solid fa-trash-can"></i>';
+
+            if (!isHighlight) {
+                if (isTransfer) { bgClass = 'w-8 h-8 !bg-purple-600'; }
+                else if (isBin) { bgClass = 'w-8 h-8 !bg-pink-500'; }
+            }
+            if (isTransfer) symbol = '<i class="fa-solid fa-dumpster"></i>';
+            else if (isBin) symbol = `<div class="w-4 h-4">${SVG_BIN_ICON}</div>`;
+
             return L.divIcon({
                 className: 'custom-icon',
                 html: `<div class="custom-marker transition-all duration-300 flex items-center justify-center ${bgClass}">${symbol}</div>`,
@@ -1206,7 +1118,8 @@
                     prevLayer.setStyle({ color: originalColor, weight: 5, opacity: 0.8 });
                 } else {
                     const isPrevTransfer = currentHighlightId.toString().startsWith('transfer_');
-                    prevLayer.setIcon(createIcon(false, isPrevTransfer)); 
+                    const isPrevBin = currentHighlightId.toString().startsWith('bin_');
+                    prevLayer.setIcon(createIcon(false, isPrevTransfer, isPrevBin)); 
                     prevLayer.setZIndexOffset(0);
                 }
             }
@@ -1216,7 +1129,8 @@
                 if (id.toString().startsWith('route_')) { layer.setStyle({ color: '#f59e0b', weight: 8, opacity: 1 }); layer.bringToFront(); } 
                 else {
                     const isTransfer = id.toString().startsWith('transfer_');
-                    layer.setIcon(createIcon(true, isTransfer)); 
+                    const isBin = id.toString().startsWith('bin_');
+                    layer.setIcon(createIcon(true, isTransfer, isBin)); 
                     layer.setZIndexOffset(1000);
                 }
             }
@@ -1257,7 +1171,8 @@
                     } catch(e) {}
                 } else if (loc.lat && loc.lng) {
                     const isTransfer = loc.id.toString().startsWith('transfer_');
-                    const marker = L.marker([loc.lat, loc.lng], { icon: createIcon(false, isTransfer) });
+                    const isBin = loc.id.toString().startsWith('bin_');
+                    const marker = L.marker([loc.lat, loc.lng], { icon: createIcon(false, isTransfer, isBin) });
                     marker.on('click', () => { map.flyTo([loc.lat, loc.lng], 17); viewDetails(loc.id); });
                     layerMap[loc.id] = marker; markersGroup.addLayer(marker); bounds.extend([loc.lat, loc.lng]);
                 }
@@ -1315,8 +1230,9 @@
                 grouped[zone].forEach(loc => {
                     const isRoute = loc.id.toString().startsWith('route_');
                     const isTransfer = loc.id.toString().startsWith('transfer_');
+                    const isBin = loc.id.toString().startsWith('bin_');
                     const routeColor = routeColorMap[loc.id] || '#3b82f6';
-                    const icon = isRoute ? `<i class="fa-solid fa-route mr-1" style="color: ${routeColor}" title="เส้นทาง"></i>` : (isTransfer ? `<i class="fa-solid fa-dumpster mr-1 text-purple-600" title="จุดพักขยะ"></i>` : `<i class="fa-solid fa-trash-can mr-1 text-emerald-500" title="จุดจัดเก็บ"></i>`);
+                    const icon = isRoute ? `<i class="fa-solid fa-route mr-1" style="color: ${routeColor}" title="เส้นทาง"></i>` : (isTransfer ? `<i class="fa-solid fa-dumpster mr-1 text-purple-600" title="จุดพักขยะ"></i>` : (isBin ? `<div class="w-3.5 h-3.5 mr-1 text-pink-500 flex-shrink-0 inline-block align-middle mb-0.5" title="จุดในหมู่บ้าน">${SVG_BIN_ICON}</div>` : `<i class="fa-solid fa-trash-can mr-1 text-emerald-500" title="จุดจัดเก็บ"></i>`));
                     const itemDragHandle = isAdminMode ? `<div class="drag-handle text-gray-300 hover:text-gray-600 px-2 py-1 cursor-grab active:cursor-grabbing" onclick="event.stopPropagation()"><i class="fa-solid fa-grip-lines"></i></div>` : '';
                     
                     html += `
@@ -1394,8 +1310,9 @@
             dataToRender.forEach((loc, index) => {
                 const isRoute = loc.id.toString().startsWith('route_');
                 const isTransfer = loc.id.toString().startsWith('transfer_');
+                const isBin = loc.id.toString().startsWith('bin_');
                 const routeColor = routeColorMap[loc.id] || '#fbbf24';
-                const icon = isRoute ? `<i class="fa-solid fa-route mx-1" style="color: ${routeColor}"></i>` : (isTransfer ? '<i class="fa-solid fa-dumpster text-purple-300 mx-1"></i>' : '<i class="fa-solid fa-trash-can text-emerald-400 mx-1"></i>');
+                const icon = isRoute ? `<i class="fa-solid fa-route mx-1" style="color: ${routeColor}"></i>` : (isTransfer ? '<i class="fa-solid fa-dumpster text-purple-300 mx-1"></i>' : (isBin ? `<div class="w-3.5 h-3.5 text-pink-400 mx-1 inline-block align-middle mb-0.5">${SVG_BIN_ICON}</div>` : '<i class="fa-solid fa-trash-can text-emerald-400 mx-1"></i>'));
                 html += `<span class="mx-4 text-emerald-50 cursor-pointer hover:text-white transition" onclick="highlightAndShowDetails('${loc.id}')">${icon} <span class="font-medium">${getDisplayName(loc.name)}</span> : <span class="text-emerald-200">${loc.schedule}</span></span>`;
                 if (index < dataToRender.length - 1) html += `<span class="text-emerald-600 text-[10px] align-middle">●</span>`;
             });
@@ -1434,7 +1351,7 @@
                     <div class="flex-1 pr-2">
                         <div class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded inline-block mb-1">${parsed.zone}</div>
                         <h2 class="text-lg font-bold text-gray-800 flex items-start leading-tight">
-                            ${isRoute ? `<i class="fa-solid fa-route mr-2 mt-1" style="color: ${routeColor}"></i>` : (loc.id.toString().startsWith('transfer_') ? '<i class="fa-solid fa-dumpster text-purple-600 mr-2 mt-1"></i>' : '<i class="fa-solid fa-trash-can text-emerald-500 mr-2 mt-1"></i>')}${parsed.name}
+                            ${isRoute ? `<i class="fa-solid fa-route mr-2 mt-1" style="color: ${routeColor}"></i>` : (loc.id.toString().startsWith('transfer_') ? '<i class="fa-solid fa-dumpster text-purple-600 mr-2 mt-1"></i>' : (loc.id.toString().startsWith('bin_') ? `<div class="w-5 h-5 text-pink-500 mr-2 shrink-0 mt-0.5">${SVG_BIN_ICON}</div>` : '<i class="fa-solid fa-trash-can text-emerald-500 mr-2 mt-1"></i>'))}${parsed.name}
                         </h2>
                     </div>
                     <div class="flex gap-1.5 shrink-0 items-start">
@@ -1464,13 +1381,14 @@
                     if (idToReset.toString().startsWith('route_')) { layerMap[idToReset].setStyle({ color: routeColorMap[idToReset] || '#3b82f6', weight: 5, opacity: 0.8 }); } 
                     else { 
                         const isTransfer = idToReset.toString().startsWith('transfer_');
-                        layerMap[idToReset].setIcon(createIcon(false, isTransfer)); 
+                        const isBin = idToReset.toString().startsWith('bin_');
+                        layerMap[idToReset].setIcon(createIcon(false, isTransfer, isBin)); 
                         layerMap[idToReset].setZIndexOffset(0); 
                     }
                 }
                 document.querySelectorAll('.list-item').forEach(el => { el.classList.remove('border-amber-400', 'bg-amber-50', 'shadow-md'); el.classList.add('border-transparent', 'bg-white'); });
             }
-            if (currentTempMarker && (adminAction === 'point' || adminAction === 'transfer')) { map.removeLayer(currentTempMarker); currentTempMarker = null; }
+            if (currentTempMarker && (adminAction === 'point' || adminAction === 'transfer' || adminAction === 'bin')) { map.removeLayer(currentTempMarker); currentTempMarker = null; }
         }
 
         function openPanel() {
@@ -1540,6 +1458,7 @@
             adminAction = mode;
             const btnPoint = document.getElementById('btnModePoint'); 
             const btnTransfer = document.getElementById('btnModeTransfer');
+            const btnBin = document.getElementById('btnModeBin');
             const btnRoute = document.getElementById('btnModeRoute');
             
             const baseClass = "py-2 px-1 border rounded transition flex items-center justify-center gap-1 ";
@@ -1547,20 +1466,31 @@
             if (mode === 'point') {
                 if(btnPoint) btnPoint.className = baseClass + "border-amber-500 bg-amber-500 text-white hover:bg-amber-600 shadow-inner";
                 if(btnTransfer) btnTransfer.className = baseClass + "border-purple-500 text-purple-600 bg-white hover:bg-purple-50";
+                if(btnBin) btnBin.className = baseClass + "border-pink-500 text-pink-600 bg-white hover:bg-pink-50";
                 if(btnRoute) btnRoute.className = baseClass + "border-blue-500 text-blue-600 bg-white hover:bg-blue-50";
                 isDrawingRoute = false; routePoints = []; if(tempPolyline) map.removeLayer(tempPolyline);
                 document.getElementById('drawingStatus').classList.add('hidden'); document.getElementById('btnFinishRoute').classList.add('hidden'); closePanel();
             } else if (mode === 'transfer') {
                 if(btnTransfer) btnTransfer.className = baseClass + "border-purple-600 bg-purple-600 text-white hover:bg-purple-700 shadow-inner";
                 if(btnPoint) btnPoint.className = baseClass + "border-amber-500 text-amber-600 bg-white hover:bg-amber-50";
+                if(btnBin) btnBin.className = baseClass + "border-pink-500 text-pink-600 bg-white hover:bg-pink-50";
                 if(btnRoute) btnRoute.className = baseClass + "border-blue-500 text-blue-600 bg-white hover:bg-blue-50";
                 isDrawingRoute = false; routePoints = []; if(tempPolyline) map.removeLayer(tempPolyline);
                 document.getElementById('drawingStatus').classList.add('hidden'); document.getElementById('btnFinishRoute').classList.add('hidden'); closePanel();
                 showToast("คลิกแผนที่เพื่อเพิ่มจุดพักขยะ");
+            } else if (mode === 'bin') {
+                if(btnBin) btnBin.className = baseClass + "border-pink-500 bg-pink-500 text-white hover:bg-pink-600 shadow-inner";
+                if(btnPoint) btnPoint.className = baseClass + "border-amber-500 text-amber-600 bg-white hover:bg-amber-50";
+                if(btnTransfer) btnTransfer.className = baseClass + "border-purple-500 text-purple-600 bg-white hover:bg-purple-50";
+                if(btnRoute) btnRoute.className = baseClass + "border-blue-500 text-blue-600 bg-white hover:bg-blue-50";
+                isDrawingRoute = false; routePoints = []; if(tempPolyline) map.removeLayer(tempPolyline);
+                document.getElementById('drawingStatus').classList.add('hidden'); document.getElementById('btnFinishRoute').classList.add('hidden'); closePanel();
+                showToast("คลิกแผนที่เพื่อเพิ่มจุดเก็บขยะในหมู่บ้าน");
             } else if (mode === 'route') {
                 if(btnRoute) btnRoute.className = baseClass + "border-blue-500 bg-blue-500 text-white hover:bg-blue-600 shadow-inner";
                 if(btnPoint) btnPoint.className = baseClass + "border-amber-500 text-amber-600 bg-white hover:bg-amber-50";
                 if(btnTransfer) btnTransfer.className = baseClass + "border-purple-500 text-purple-600 bg-white hover:bg-purple-50";
+                if(btnBin) btnBin.className = baseClass + "border-pink-500 text-pink-600 bg-white hover:bg-pink-50";
                 isDrawingRoute = true; routePoints = []; if(currentTempMarker) map.removeLayer(currentTempMarker); if(tempPolyline) map.removeLayer(tempPolyline);
                 tempPolyline = L.polyline([], { color: '#ef4444', weight: 4, dashArray: '5, 5' }).addTo(map);
                 document.getElementById('drawingStatus').classList.remove('hidden'); showToast("คลิกแผนที่เพื่อลากเส้น"); closePanel();
@@ -1577,13 +1507,21 @@
             renderForm({ id: '', name: '', lat: JSON.stringify(routePoints), lng: '', schedule: '', responsible: '', details: '' }, true, true);
         }
 
-        function showPointForm(lat, lng, isTransfer = false) {
+        function showPointForm(lat, lng, isTransfer = false, isBin = false) {
             if (currentTempMarker) map.removeLayer(currentTempMarker);
-            const bgClass = isTransfer ? '!bg-purple-600' : '!bg-amber-500';
-            const symbolClass = isTransfer ? 'fa-dumpster' : 'fa-plus';
-            const tempIcon = L.divIcon({ className: 'custom-icon', html: `<div class="custom-marker w-8 h-8 ${bgClass} !border-white animate-bounce"><i class="fa-solid ${symbolClass}"></i></div>`, iconSize: [32, 32], iconAnchor: [16, 16] });
+            let bgClass = '!bg-amber-500';
+            let innerHtml = '<i class="fa-solid fa-plus"></i>';
+            if (isTransfer) { bgClass = '!bg-purple-600'; innerHtml = '<i class="fa-solid fa-dumpster"></i>'; }
+            else if (isBin) { bgClass = '!bg-pink-500'; innerHtml = `<div class="w-4 h-4 text-white">${SVG_BIN_ICON}</div>`; }
+
+            const tempIcon = L.divIcon({ className: 'custom-icon', html: `<div class="custom-marker w-8 h-8 ${bgClass} !border-white animate-bounce flex justify-center items-center text-white">${innerHtml}</div>`, iconSize: [32, 32], iconAnchor: [16, 16] });
             currentTempMarker = L.marker([lat, lng], {icon: tempIcon}).addTo(map);
-            renderForm({ id: isTransfer ? 'transfer_' + Date.now() : '', name: '', lat: lat, lng: lng, schedule: '', responsible: '', details: '' }, true, false, isTransfer);
+            
+            let tempId = '';
+            if (isTransfer) tempId = 'transfer_' + Date.now();
+            else if (isBin) tempId = 'bin_' + Date.now();
+            
+            renderForm({ id: tempId, name: '', lat: lat, lng: lng, schedule: '', responsible: '', details: '' }, true, false, isTransfer, isBin);
         }
 
         function editLocation(id) {
@@ -1592,8 +1530,9 @@
                 let loc = {...originalLoc};
                 const isRoute = id.toString().startsWith('route_');
                 const isTransfer = id.toString().startsWith('transfer_');
+                const isBin = id.toString().startsWith('bin_');
                 if (isRoute && loc.details && loc.details.toString().startsWith('[')) { loc.lat = loc.details; loc.details = ''; }
-                renderForm(loc, false, isRoute, isTransfer);
+                renderForm(loc, false, isRoute, isTransfer, isBin);
             }
         }
 
@@ -1603,10 +1542,11 @@
             else { input.classList.add('hidden'); }
         };
 
-        function renderForm(data, isNew, isRouteMode, isTransferMode = false) {
+        function renderForm(data, isNew, isRouteMode, isTransferMode = false, isBinMode = false) {
             const isTransfer = isTransferMode || (data && data.id && data.id.toString().startsWith('transfer_'));
-            const title = isNew ? (isRouteMode ? 'บันทึกเส้นทางใหม่' : (isTransfer ? 'เพิ่มจุดพักขยะใหม่' : 'เพิ่มจุดจัดเก็บใหม่')) : (isTransfer ? 'แก้ไขจุดพักขยะ' : 'แก้ไขข้อมูล');
-            const icon = isRouteMode ? 'fa-route text-blue-500' : (isTransfer ? 'fa-dumpster text-purple-600' : 'fa-pen-to-square text-amber-500');
+            const isBin = isBinMode || (data && data.id && data.id.toString().startsWith('bin_'));
+            const title = isNew ? (isRouteMode ? 'บันทึกเส้นทางใหม่' : (isTransfer ? 'เพิ่มจุดพักขยะใหม่' : (isBin ? 'เพิ่มจุดเก็บขยะในหมู่บ้าน' : 'เพิ่มจุดจัดเก็บใหม่'))) : (isTransfer ? 'แก้ไขจุดพักขยะ' : (isBin ? 'แก้ไขจุดในหมู่บ้าน' : 'แก้ไขข้อมูล'));
+            const iconHtml = isRouteMode ? '<i class="fa-solid fa-route text-blue-500 mr-2 mt-1"></i>' : (isTransfer ? '<i class="fa-solid fa-dumpster text-purple-600 mr-2 mt-1"></i>' : (isBin ? `<div class="w-5 h-5 text-pink-500 mr-2 shrink-0 mt-0.5">${SVG_BIN_ICON}</div>` : '<i class="fa-solid fa-pen-to-square text-amber-500 mr-2 mt-1"></i>'));
             const parsed = parseLocationName(data.name); const currentZone = parsed.zone; const currentName = isNew ? '' : parsed.name;
             const uniqueZones = new Set(['ทั่วไป']);
             locationsData.forEach(loc => { const p = parseLocationName(loc.name); if (p.zone) uniqueZones.add(p.zone); });
@@ -1621,7 +1561,7 @@
             
             const html = `
                 <div class="flex justify-between items-start mb-4 border-b pb-3 border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800 flex items-start flex-1 pr-2 leading-tight"><i class="fa-solid ${icon} mr-2 mt-1"></i>${title}</h2>
+                    <h2 class="text-lg font-bold text-gray-800 flex items-start flex-1 pr-2 leading-tight">${iconHtml}${title}</h2>
                     <button onclick="closePanel()" class="text-gray-500 bg-gray-100 hover:bg-gray-200 w-8 h-8 rounded-full transition shadow-sm flex justify-center items-center shrink-0 ml-1"><i class="fa-solid fa-xmark"></i></button>
                 </div>
                 <form id="dataForm" onsubmit="saveData(event, ${isRouteMode})" class="space-y-3 text-sm">
@@ -1631,7 +1571,7 @@
                         <select id="f_zone_select" class="w-full border-b-2 border-gray-300 px-2 py-1 bg-white focus:border-emerald-500 outline-none transition font-medium text-gray-800 rounded shadow-sm" onchange="window.toggleNewZoneInput()">${zoneOptions}</select>
                         <input type="text" id="f_zone_new" placeholder="พิมพ์ชื่อกลุ่มใหม่ที่ต้องการ..." class="w-full border-b-2 border-emerald-400 px-2 py-2 mt-2 bg-transparent outline-none transition font-medium text-emerald-800 hidden">
                     </div>
-                    <div><label class="block text-gray-700 mb-1 text-xs font-medium">ชื่อ${isRouteMode ? 'เส้นทาง' : (isTransfer ? 'จุดพักขยะ' : 'สถานที่')} *</label><input type="text" id="f_name" value="${currentName}" placeholder="${isTransfer ? 'เช่น จุดพักขยะหลักซอย 3' : 'เช่น ซอย 1'}" required class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    <div><label class="block text-gray-700 mb-1 text-xs font-medium">ชื่อ${isRouteMode ? 'เส้นทาง' : (isTransfer ? 'จุดพักขยะ' : (isBin ? 'จุดเก็บในหมู่บ้าน' : 'สถานที่'))} *</label><input type="text" id="f_name" value="${currentName}" placeholder="${isTransfer ? 'เช่น จุดพักขยะหลักซอย 3' : (isBin ? 'เช่น ถังขยะซอย 1' : 'เช่น ซอย 1')}" required class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                     <div><label class="block text-gray-700 mb-1 text-xs font-medium">วันเวลาจัดเก็บ *</label><input type="text" id="f_schedule" value="${data.schedule}" placeholder="เช่น จันทร์,พุธ 08:00น." required class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                     <div><label class="block text-gray-700 mb-1 text-xs font-medium">ชื่อผู้รับผิดชอบ</label><input type="text" id="f_responsible" value="${data.responsible}" class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                     <div><label class="block text-gray-700 mb-1 text-xs font-medium">รายละเอียดเพิ่มเติม</label><textarea id="f_details" rows="2" class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none">${(data.details && data.details.toString().startsWith('[')) ? '' : (data.details || '')}</textarea></div>
@@ -1649,6 +1589,7 @@
             if (!finalId) {
                 if (isRoute) finalId = 'route_' + Date.now();
                 else if (adminAction === 'transfer') finalId = 'transfer_' + Date.now();
+                else if (adminAction === 'bin') finalId = 'bin_' + Date.now();
                 else finalId = Date.now().toString();
             }
             let zoneVal = document.getElementById('f_zone_select').value; if (zoneVal === 'NEW_ZONE') zoneVal = document.getElementById('f_zone_new').value.trim();
