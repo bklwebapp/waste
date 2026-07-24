@@ -1489,7 +1489,7 @@
                 }
                 document.querySelectorAll('.list-item').forEach(el => { el.classList.remove('border-amber-400', 'bg-amber-50', 'shadow-md'); el.classList.add('border-transparent', 'bg-white'); });
             }
-            if (currentTempMarker && (adminAction === 'point' || adminAction === 'transfer')) { map.removeLayer(currentTempMarker); currentTempMarker = null; }
+            if (currentTempMarker && (adminAction === 'point' || adminAction === 'transfer' || adminAction === 'bin')) { map.removeLayer(currentTempMarker); currentTempMarker = null; }
         }
 
         function openPanel() {
@@ -1668,7 +1668,7 @@
                 <form id="dataForm" onsubmit="saveData(event, ${isRouteMode})" class="space-y-3 text-sm">
                     <input type="hidden" id="f_id" value="${data.id}"><input type="hidden" id="f_lat" value='${data.lat}'><input type="hidden" id="f_lng" value="${data.lng}">
                     <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 mb-2">
-                        <label class="block text-emerald-800 mb-1 text-[11px] font-bold uppercase tracking-wider">กลุ่ม / ชุมชน / หมู่บ้าน</label>
+                        <label class="block text-emerald-800 mb-1 text-[11px] font-bold uppercase tracking-wider">กลุ่ม / ชุมชน</label>
                         <select id="f_zone_select" class="w-full border-b-2 border-gray-300 px-2 py-1 bg-white focus:border-emerald-500 outline-none transition font-medium text-gray-800 rounded shadow-sm" onchange="window.toggleNewZoneInput()">${zoneOptions}</select>
                         <input type="text" id="f_zone_new" placeholder="พิมพ์ชื่อกลุ่มใหม่ที่ต้องการ..." class="w-full border-b-2 border-emerald-400 px-2 py-2 mt-2 bg-transparent outline-none transition font-medium text-emerald-800 hidden">
                     </div>
