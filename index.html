@@ -1116,7 +1116,8 @@
             const payload = {
                 action: 'save_popup', id: finalId, 
                 imageUrl: document.getElementById('pop_img').value.trim(), 
-                dates: document.getElementById('pop_dates').value.trim()
+                dates: document.getElementById('pop_dates').value.trim(),
+                password: sessionStorage.getItem('admin_pwd') || ''
             };
 
             if (!GAS_URL) {
@@ -1390,7 +1391,7 @@
             if (!GAS_URL) { showToast("บันทึกลำดับจำลองสำเร็จ"); return; }
 
             try {
-                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', cache: 'no-cache', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reorder', items: newItems }) });
+                await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', cache: 'no-cache', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'reorder', items: newItems, password: sessionStorage.getItem('admin_pwd') || '' }) });
                 showToast("บันทึกลำดับสำเร็จ");
             } catch (error) { showToast("เกิดข้อผิดพลาดในการบันทึกลำดับ", true); }
         }
@@ -1516,20 +1517,20 @@
 
         function requestAdminToggle() {
             hideMobileList(); 
-            if (isAdminMode) { isAdminMode = false; localStorage.removeItem(ADMIN_SESSION_KEY); clearTimeout(sessionTimeout); updateAdminUI(); showToast("ออกจากระบบผู้ดูแล"); } 
+            if (isAdminMode) { isAdminMode = false; localStorage.removeItem(ADMIN_SESSION_KEY); sessionStorage.removeItem('admin_pwd'); clearTimeout(sessionTimeout); updateAdminUI(); showToast("ออกจากระบบผู้ดูแล"); } 
             else { document.getElementById('adminPassword').value = ''; document.getElementById('passwordModal').classList.remove('hidden'); setTimeout(() => document.getElementById('adminPassword').focus(), 100); }
         }
 
         async function verifyPassword() {
             const pwd = document.getElementById('adminPassword').value; const btn = document.getElementById('btnLogin');
             if (!pwd) return showToast("กรุณาใส่รหัสผ่าน", true);
-            if (!GAS_URL) { if (pwd === "1234") { loginSuccess(); showToast("เข้าสู่ระบบจำลองสำเร็จ"); } else { showToast("รหัสผิด", true); } return; }
+            if (!GAS_URL) { if (pwd === "1234") { sessionStorage.setItem('admin_pwd', pwd); loginSuccess(); showToast("เข้าสู่ระบบจำลองสำเร็จ"); } else { showToast("รหัสผิด", true); } return; }
 
             btn.disabled = true; document.getElementById('btnLoginText').innerText = "รอสักครู่..."; document.getElementById('btnLoginIcon').className = "fa-solid fa-spinner fa-spin mr-2 block";
             try {
-                const response = await fetch(`${GAS_URL}?action=verify&password=${encodeURIComponent(pwd)}`);
+                const response = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action: 'verify', password: pwd }) });
                 const result = await response.json();
-                if (result.status === 'success') { loginSuccess(); showToast("เข้าสู่ระบบสำเร็จ"); } 
+                if (result.status === 'success') { sessionStorage.setItem('admin_pwd', pwd); loginSuccess(); showToast("เข้าสู่ระบบสำเร็จ"); } 
                 else { showToast(result.message || "รหัสผิด!", true); document.getElementById('adminPassword').value = ''; }
             } catch (error) { showToast("เชื่อมต่อเซิร์ฟเวอร์ไม่ได้", true); } 
             finally { btn.disabled = false; document.getElementById('btnLoginText').innerText = "เข้าสู่ระบบ"; document.getElementById('btnLoginIcon').className = "hidden"; }
@@ -1697,7 +1698,7 @@
             if (zoneVal === 'ทั่วไป') zoneVal = ''; 
 
             const nameVal = document.getElementById('f_name').value.trim(); const combinedName = zoneVal ? `${zoneVal}|${nameVal}` : nameVal;
-            const payload = { action: 'save', id: finalId, name: combinedName, lat: document.getElementById('f_lat').value, lng: document.getElementById('f_lng').value, schedule: document.getElementById('f_schedule').value, responsible: document.getElementById('f_responsible').value, details: document.getElementById('f_details').value };
+            const payload = { action: 'save', id: finalId, name: combinedName, lat: document.getElementById('f_lat').value, lng: document.getElementById('f_lng').value, schedule: document.getElementById('f_schedule').value, responsible: document.getElementById('f_responsible').value, details: document.getElementById('f_details').value, password: sessionStorage.getItem('admin_pwd') || '' };
 
             if (!GAS_URL) {
                 setTimeout(() => {
@@ -1735,7 +1736,7 @@
                     renderManagePopupsList(); showToast("ลบป๊อปอัพจำลองสำเร็จ"); itemToDelete = null; return; 
                 }
                 try {
-                    await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete_popup', id: itemToDelete }) });
+                    await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete_popup', id: itemToDelete, password: sessionStorage.getItem('admin_pwd') || '' }) });
                     showToast("ลบป๊อปอัพสำเร็จ กำลังอัปเดต..."); setTimeout(async () => { await loadData(); renderManagePopupsList(); }, 1500);
                 } catch(e) { showToast("ลบไม่สำเร็จ กรุณาลองใหม่", true); }
                 
@@ -1743,7 +1744,7 @@
                 closePanel(); showToast("กำลังลบข้อมูล...");
                 if (!GAS_URL) { locationsData = locationsData.filter(l => l.id != itemToDelete); renderData(); showToast("ลบข้อมูลจำลองสำเร็จ"); itemToDelete = null; return; }
                 try {
-                    await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id: itemToDelete }) });
+                    await fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'delete', id: itemToDelete, password: sessionStorage.getItem('admin_pwd') || '' }) });
                     showToast("ลบข้อมูลสำเร็จ กำลังอัปเดตหน้าจอ..."); setTimeout(async () => { await loadData(); }, 1500);
                 } catch(e) { showToast("ลบไม่สำเร็จ กรุณาลองใหม่", true); }
             }
