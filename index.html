@@ -240,15 +240,18 @@
                     <span><i class="fa-solid fa-wrench mr-1"></i> โหมดผู้ดูแล <span class="text-xs font-normal text-amber-600">(แตะ <i class="fa-solid fa-grip-vertical mx-1"></i> เพื่อลาก)</span></span>
                     <span id="drawingStatus" class="text-xs bg-amber-200 px-2 py-0.5 rounded-full hidden animate-pulse">กำลังวาดเส้น...</span>
                 </div>
-                <div class="grid grid-cols-4 gap-1 text-[11px] mb-1">
+                <div class="grid grid-cols-5 gap-1 text-[10px] md:text-[11px] mb-1">
                     <button onclick="setMode('point')" id="btnModePoint" class="py-2 px-1 border border-amber-500 bg-amber-500 text-white rounded hover:bg-amber-600 transition shadow-inner flex items-center justify-center gap-1" title="เพิ่มจุดเก็บขยะ">
-                        <i class="fa-solid fa-location-dot"></i> <span class="truncate">จุดทั่วไป</span>
+                        <i class="fa-solid fa-location-dot"></i> <span class="truncate">ทั่วไป</span>
                     </button>
                     <button onclick="setMode('transfer')" id="btnModeTransfer" class="py-2 px-1 border border-purple-500 text-purple-600 bg-white rounded hover:bg-purple-50 transition flex items-center justify-center gap-1" title="เพิ่มจุดพักขยะหลัก">
                         <i class="fa-solid fa-dumpster"></i> <span class="truncate">จุดพัก</span>
                     </button>
                     <button onclick="setMode('bin')" id="btnModeBin" class="py-2 px-1 border border-pink-500 text-pink-600 bg-white rounded hover:bg-pink-50 transition flex items-center justify-center gap-1" title="เพิ่มจุดเก็บขยะในหมู่บ้าน">
                         <div class="w-[1.125em] h-[1.125em] -mt-0.5"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-full h-full"><path d="M7 5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><rect x="2" y="5" width="16" height="3" rx="1"/><path d="M4 8v11a2 2 0 0 0 2 2h5"/><path d="M7 11v7"/><path d="M10 11v7"/><path d="M13 11v3"/><path d="M16.5 13C14 13 12 15 12 18v1a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2v-1c0-3-2-5-4.5-5Z"/><path d="M16.5 13 L 14.5 10 C 14.5 8.5 18.5 8.5 18.5 10 Z"/><path d="M15.5 11.5 L 14 13.5"/><path d="M17.5 11.5 L 19 13.5"/></svg></div> <span class="truncate">ถังขยะ</span>
+                    </button>
+                    <button onclick="setMode('large')" id="btnModeLarge" class="py-2 px-1 border border-rose-700 text-rose-700 bg-white rounded hover:bg-rose-50 transition flex items-center justify-center gap-1" title="เพิ่มจุดเก็บขยะชิ้นใหญ่">
+                        <i class="fa-solid fa-couch"></i> <span class="truncate">ชิ้นใหญ่</span>
                     </button>
                     <button onclick="setMode('route')" id="btnModeRoute" class="py-2 px-1 border border-blue-500 text-blue-600 bg-white rounded hover:bg-blue-50 transition flex items-center justify-center gap-1" title="วาดเส้นทางรถเก็บขยะ">
                         <i class="fa-solid fa-route"></i> <span class="truncate">เส้นทาง</span>
@@ -900,6 +903,7 @@
                 if (adminAction === 'point') showPointForm(e.latlng.lat, e.latlng.lng, false);
                 else if (adminAction === 'transfer') showPointForm(e.latlng.lat, e.latlng.lng, true);
                 else if (adminAction === 'bin') showPointForm(e.latlng.lat, e.latlng.lng, false, true);
+                else if (adminAction === 'large') showPointForm(e.latlng.lat, e.latlng.lng, false, false, true);
                 else if (adminAction === 'route') addRoutePoint(e.latlng);
             });
         }
@@ -1158,8 +1162,9 @@
                 const isRoute = loc.id.toString().startsWith('route_');
                 const isTransfer = loc.id.toString().startsWith('transfer_');
                 const isBin = loc.id.toString().startsWith('bin_');
-                const routeColor = isRoute ? (routeColorMap[loc.id] || '#3b82f6') : (isTransfer ? '#9333ea' : (isBin ? '#ec4899' : '#10b981'));
-                const icon = isRoute ? `<i class="fa-solid fa-route" style="color: ${routeColor}" title="เส้นทาง"></i>` : (isTransfer ? `<i class="fa-solid fa-dumpster text-purple-600" title="จุดพักขยะ"></i>` : (isBin ? `<div class="w-4 h-4 text-pink-500 inline-block align-middle mb-0.5" title="จุดในหมู่บ้าน">${SVG_BIN_ICON}</div>` : `<i class="fa-solid fa-trash-can text-emerald-500" title="จุดจัดเก็บ"></i>`));
+                const isLarge = loc.id.toString().startsWith('large_');
+                const routeColor = isRoute ? (routeColorMap[loc.id] || '#3b82f6') : (isTransfer ? '#9333ea' : (isBin ? '#ec4899' : (isLarge ? '#be123c' : '#10b981')));
+                const icon = isRoute ? `<i class="fa-solid fa-route" style="color: ${routeColor}" title="เส้นทาง"></i>` : (isTransfer ? `<i class="fa-solid fa-dumpster text-purple-600" title="จุดพักขยะ"></i>` : (isBin ? `<div class="w-4 h-4 text-pink-500 inline-block align-middle mb-0.5" title="จุดในหมู่บ้าน">${SVG_BIN_ICON}</div>` : (isLarge ? `<i class="fa-solid fa-couch text-rose-700" title="จุดเก็บขยะชิ้นใหญ่"></i>` : `<i class="fa-solid fa-trash-can text-emerald-500" title="จุดจัดเก็บ"></i>`)));
                 html += `<tr class="border-b hover:bg-gray-50 transition">
                         <td class="p-3 text-center text-lg">${icon}</td><td class="p-3 font-medium text-gray-800">${getDisplayName(loc.name)}</td>
                         <td class="p-3 text-emerald-600">${loc.schedule || '-'}</td><td class="p-3 text-gray-600">${loc.responsible || '-'}</td>
@@ -1194,16 +1199,18 @@
             document.getElementById('confirmDeleteBtn').onclick = executeDelete; 
         }
 
-        function createIcon(isHighlight = false, isTransfer = false, isBin = false) {
+        function createIcon(isHighlight = false, isTransfer = false, isBin = false, isLarge = false) {
             let bgClass = isHighlight ? 'w-10 h-10 !bg-amber-500 !border-[3px] shadow-[0_0_15px_rgba(245,158,11,0.6)] z-50' : 'w-8 h-8';
             let symbol = '<i class="fa-solid fa-trash-can"></i>';
 
             if (!isHighlight) {
                 if (isTransfer) { bgClass = 'w-8 h-8 !bg-purple-600'; }
                 else if (isBin) { bgClass = 'w-8 h-8 !bg-pink-500'; }
+                else if (isLarge) { bgClass = 'w-8 h-8 !bg-rose-700'; }
             }
             if (isTransfer) symbol = '<i class="fa-solid fa-dumpster"></i>';
             else if (isBin) symbol = `<div class="w-4 h-4">${SVG_BIN_ICON}</div>`;
+            else if (isLarge) symbol = '<i class="fa-solid fa-couch"></i>';
 
             return L.divIcon({
                 className: 'custom-icon',
@@ -1222,7 +1229,8 @@
                 } else {
                     const isPrevTransfer = currentHighlightId.toString().startsWith('transfer_');
                     const isPrevBin = currentHighlightId.toString().startsWith('bin_');
-                    prevLayer.setIcon(createIcon(false, isPrevTransfer, isPrevBin)); 
+                    const isPrevLarge = currentHighlightId.toString().startsWith('large_');
+                    prevLayer.setIcon(createIcon(false, isPrevTransfer, isPrevBin, isPrevLarge)); 
                     prevLayer.setZIndexOffset(0);
                 }
             }
@@ -1232,7 +1240,9 @@
                 if (id.toString().startsWith('route_')) { layer.setStyle({ color: '#f59e0b', weight: 8, opacity: 1 }); layer.bringToFront(); } 
                 else {
                     const isTransfer = id.toString().startsWith('transfer_');
-                    layer.setIcon(createIcon(true, isTransfer)); 
+                    const isBin = id.toString().startsWith('bin_');
+                    const isLarge = id.toString().startsWith('large_');
+                    layer.setIcon(createIcon(true, isTransfer, isBin, isLarge)); 
                     layer.setZIndexOffset(1000);
                 }
             }
@@ -1274,7 +1284,8 @@
                 } else if (loc.lat && loc.lng) {
                     const isTransfer = loc.id.toString().startsWith('transfer_');
                     const isBin = loc.id.toString().startsWith('bin_');
-                    const marker = L.marker([loc.lat, loc.lng], { icon: createIcon(false, isTransfer, isBin) });
+                    const isLarge = loc.id.toString().startsWith('large_');
+                    const marker = L.marker([loc.lat, loc.lng], { icon: createIcon(false, isTransfer, isBin, isLarge) });
                     marker.on('click', () => { map.flyTo([loc.lat, loc.lng], 17); viewDetails(loc.id); });
                     layerMap[loc.id] = marker; markersGroup.addLayer(marker); bounds.extend([loc.lat, loc.lng]);
                 }
@@ -1413,8 +1424,9 @@
                 const isRoute = loc.id.toString().startsWith('route_');
                 const isTransfer = loc.id.toString().startsWith('transfer_');
                 const isBin = loc.id.toString().startsWith('bin_');
+                const isLarge = loc.id.toString().startsWith('large_');
                 const routeColor = routeColorMap[loc.id] || '#fbbf24';
-                const icon = isRoute ? `<i class="fa-solid fa-route mx-1" style="color: ${routeColor}"></i>` : (isTransfer ? '<i class="fa-solid fa-dumpster text-purple-300 mx-1"></i>' : (isBin ? `<div class="w-3.5 h-3.5 text-pink-400 mx-1 inline-block align-middle mb-0.5">${SVG_BIN_ICON}</div>` : '<i class="fa-solid fa-trash-can text-emerald-400 mx-1"></i>'));
+                const icon = isRoute ? `<i class="fa-solid fa-route mx-1" style="color: ${routeColor}"></i>` : (isTransfer ? '<i class="fa-solid fa-dumpster text-purple-300 mx-1"></i>' : (isBin ? `<div class="w-3.5 h-3.5 text-pink-400 mx-1 inline-block align-middle mb-0.5">${SVG_BIN_ICON}</div>` : (isLarge ? '<i class="fa-solid fa-couch text-rose-600 mx-1"></i>' : '<i class="fa-solid fa-trash-can text-emerald-400 mx-1"></i>')));
                 html += `<span class="mx-4 text-emerald-50 cursor-pointer hover:text-white transition" onclick="highlightAndShowDetails('${loc.id}')">${icon} <span class="font-medium">${getDisplayName(loc.name)}</span> : <span class="text-emerald-200">${loc.schedule}</span></span>`;
                 if (index < dataToRender.length - 1) html += `<span class="text-emerald-600 text-[10px] align-middle">●</span>`;
             });
@@ -1453,7 +1465,7 @@
                     <div class="flex-1 pr-2">
                         <div class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded inline-block mb-1">${parsed.zone}</div>
                         <h2 class="text-lg font-bold text-gray-800 flex items-start leading-tight">
-                            ${isRoute ? `<i class="fa-solid fa-route mr-2 mt-1" style="color: ${routeColor}"></i>` : (loc.id.toString().startsWith('transfer_') ? '<i class="fa-solid fa-dumpster text-purple-600 mr-2 mt-1"></i>' : (loc.id.toString().startsWith('bin_') ? `<div class="w-5 h-5 text-pink-500 mr-2 shrink-0 mt-0.5">${SVG_BIN_ICON}</div>` : '<i class="fa-solid fa-trash-can text-emerald-500 mr-2 mt-1"></i>'))}${parsed.name}
+                            ${isRoute ? `<i class="fa-solid fa-route mr-2 mt-1" style="color: ${routeColor}"></i>` : (loc.id.toString().startsWith('transfer_') ? '<i class="fa-solid fa-dumpster text-purple-600 mr-2 mt-1"></i>' : (loc.id.toString().startsWith('bin_') ? `<div class="w-5 h-5 text-pink-500 mr-2 shrink-0 mt-0.5">${SVG_BIN_ICON}</div>` : (loc.id.toString().startsWith('large_') ? '<i class="fa-solid fa-couch text-rose-700 mr-2 mt-1"></i>' : '<i class="fa-solid fa-trash-can text-emerald-500 mr-2 mt-1"></i>')))}${parsed.name}
                         </h2>
                     </div>
                     <div class="flex gap-1.5 shrink-0 items-start">
@@ -1484,13 +1496,14 @@
                     else { 
                         const isTransfer = idToReset.toString().startsWith('transfer_');
                         const isBin = idToReset.toString().startsWith('bin_');
-                        layerMap[idToReset].setIcon(createIcon(false, isTransfer, isBin)); 
+                        const isLarge = idToReset.toString().startsWith('large_');
+                        layerMap[idToReset].setIcon(createIcon(false, isTransfer, isBin, isLarge)); 
                         layerMap[idToReset].setZIndexOffset(0); 
                     }
                 }
                 document.querySelectorAll('.list-item').forEach(el => { el.classList.remove('border-amber-400', 'bg-amber-50', 'shadow-md'); el.classList.add('border-transparent', 'bg-white'); });
             }
-            if (currentTempMarker && (adminAction === 'point' || adminAction === 'transfer' || adminAction === 'bin')) { map.removeLayer(currentTempMarker); currentTempMarker = null; }
+            if (currentTempMarker && (adminAction === 'point' || adminAction === 'transfer' || adminAction === 'bin' || adminAction === 'large')) { map.removeLayer(currentTempMarker); currentTempMarker = null; }
         }
 
         function openPanel() {
@@ -1561,6 +1574,7 @@
             const btnPoint = document.getElementById('btnModePoint'); 
             const btnTransfer = document.getElementById('btnModeTransfer');
             const btnBin = document.getElementById('btnModeBin');
+            const btnLarge = document.getElementById('btnModeLarge');
             const btnRoute = document.getElementById('btnModeRoute');
             
             const baseClass = "py-2 px-1 border rounded transition flex items-center justify-center gap-1 ";
@@ -1569,6 +1583,7 @@
                 if(btnPoint) btnPoint.className = baseClass + "border-amber-500 bg-amber-500 text-white hover:bg-amber-600 shadow-inner";
                 if(btnTransfer) btnTransfer.className = baseClass + "border-purple-500 text-purple-600 bg-white hover:bg-purple-50";
                 if(btnBin) btnBin.className = baseClass + "border-pink-500 text-pink-600 bg-white hover:bg-pink-50";
+                if(btnLarge) btnLarge.className = baseClass + "border-rose-700 text-rose-700 bg-white hover:bg-rose-50";
                 if(btnRoute) btnRoute.className = baseClass + "border-blue-500 text-blue-600 bg-white hover:bg-blue-50";
                 isDrawingRoute = false; routePoints = []; if(tempPolyline) map.removeLayer(tempPolyline);
                 document.getElementById('drawingStatus').classList.add('hidden'); document.getElementById('btnFinishRoute').classList.add('hidden'); closePanel();
@@ -1576,6 +1591,7 @@
                 if(btnTransfer) btnTransfer.className = baseClass + "border-purple-600 bg-purple-600 text-white hover:bg-purple-700 shadow-inner";
                 if(btnPoint) btnPoint.className = baseClass + "border-amber-500 text-amber-600 bg-white hover:bg-amber-50";
                 if(btnBin) btnBin.className = baseClass + "border-pink-500 text-pink-600 bg-white hover:bg-pink-50";
+                if(btnLarge) btnLarge.className = baseClass + "border-rose-700 text-rose-700 bg-white hover:bg-rose-50";
                 if(btnRoute) btnRoute.className = baseClass + "border-blue-500 text-blue-600 bg-white hover:bg-blue-50";
                 isDrawingRoute = false; routePoints = []; if(tempPolyline) map.removeLayer(tempPolyline);
                 document.getElementById('drawingStatus').classList.add('hidden'); document.getElementById('btnFinishRoute').classList.add('hidden'); closePanel();
@@ -1584,15 +1600,26 @@
                 if(btnBin) btnBin.className = baseClass + "border-pink-500 bg-pink-500 text-white hover:bg-pink-600 shadow-inner";
                 if(btnPoint) btnPoint.className = baseClass + "border-amber-500 text-amber-600 bg-white hover:bg-amber-50";
                 if(btnTransfer) btnTransfer.className = baseClass + "border-purple-500 text-purple-600 bg-white hover:bg-purple-50";
+                if(btnLarge) btnLarge.className = baseClass + "border-rose-700 text-rose-700 bg-white hover:bg-rose-50";
                 if(btnRoute) btnRoute.className = baseClass + "border-blue-500 text-blue-600 bg-white hover:bg-blue-50";
                 isDrawingRoute = false; routePoints = []; if(tempPolyline) map.removeLayer(tempPolyline);
                 document.getElementById('drawingStatus').classList.add('hidden'); document.getElementById('btnFinishRoute').classList.add('hidden'); closePanel();
                 showToast("คลิกแผนที่เพื่อเพิ่มจุดเก็บขยะในหมู่บ้าน");
+            } else if (mode === 'large') {
+                if(btnLarge) btnLarge.className = baseClass + "border-rose-700 bg-rose-700 text-white hover:bg-rose-800 shadow-inner";
+                if(btnPoint) btnPoint.className = baseClass + "border-amber-500 text-amber-600 bg-white hover:bg-amber-50";
+                if(btnTransfer) btnTransfer.className = baseClass + "border-purple-500 text-purple-600 bg-white hover:bg-purple-50";
+                if(btnBin) btnBin.className = baseClass + "border-pink-500 text-pink-600 bg-white hover:bg-pink-50";
+                if(btnRoute) btnRoute.className = baseClass + "border-blue-500 text-blue-600 bg-white hover:bg-blue-50";
+                isDrawingRoute = false; routePoints = []; if(tempPolyline) map.removeLayer(tempPolyline);
+                document.getElementById('drawingStatus').classList.add('hidden'); document.getElementById('btnFinishRoute').classList.add('hidden'); closePanel();
+                showToast("คลิกแผนที่เพื่อเพิ่มจุดเก็บขยะชิ้นใหญ่");
             } else if (mode === 'route') {
                 if(btnRoute) btnRoute.className = baseClass + "border-blue-500 bg-blue-500 text-white hover:bg-blue-600 shadow-inner";
                 if(btnPoint) btnPoint.className = baseClass + "border-amber-500 text-amber-600 bg-white hover:bg-amber-50";
                 if(btnTransfer) btnTransfer.className = baseClass + "border-purple-500 text-purple-600 bg-white hover:bg-purple-50";
                 if(btnBin) btnBin.className = baseClass + "border-pink-500 text-pink-600 bg-white hover:bg-pink-50";
+                if(btnLarge) btnLarge.className = baseClass + "border-rose-700 text-rose-700 bg-white hover:bg-rose-50";
                 isDrawingRoute = true; routePoints = []; if(currentTempMarker) map.removeLayer(currentTempMarker); if(tempPolyline) map.removeLayer(tempPolyline);
                 tempPolyline = L.polyline([], { color: '#ef4444', weight: 4, dashArray: '5, 5' }).addTo(map);
                 document.getElementById('drawingStatus').classList.remove('hidden'); showToast("คลิกแผนที่เพื่อลากเส้น"); closePanel();
@@ -1609,12 +1636,13 @@
             renderForm({ id: '', name: '', lat: JSON.stringify(routePoints), lng: '', schedule: '', responsible: '', details: '' }, true, true);
         }
 
-        function showPointForm(lat, lng, isTransfer = false, isBin = false) {
+        function showPointForm(lat, lng, isTransfer = false, isBin = false, isLarge = false) {
             if (currentTempMarker) map.removeLayer(currentTempMarker);
             let bgClass = '!bg-amber-500';
             let innerHtml = '<i class="fa-solid fa-plus"></i>';
             if (isTransfer) { bgClass = '!bg-purple-600'; innerHtml = '<i class="fa-solid fa-dumpster"></i>'; }
             else if (isBin) { bgClass = '!bg-pink-500'; innerHtml = `<div class="w-4 h-4 text-white">${SVG_BIN_ICON}</div>`; }
+            else if (isLarge) { bgClass = '!bg-rose-700'; innerHtml = '<i class="fa-solid fa-couch"></i>'; }
 
             const tempIcon = L.divIcon({ className: 'custom-icon', html: `<div class="custom-marker w-8 h-8 ${bgClass} !border-white animate-bounce flex justify-center items-center text-white">${innerHtml}</div>`, iconSize: [32, 32], iconAnchor: [16, 16] });
             currentTempMarker = L.marker([lat, lng], {icon: tempIcon}).addTo(map);
@@ -1622,8 +1650,9 @@
             let tempId = '';
             if (isTransfer) tempId = 'transfer_' + Date.now();
             else if (isBin) tempId = 'bin_' + Date.now();
+            else if (isLarge) tempId = 'large_' + Date.now();
             
-            renderForm({ id: tempId, name: '', lat: lat, lng: lng, schedule: '', responsible: '', details: '' }, true, false, isTransfer, isBin);
+            renderForm({ id: tempId, name: '', lat: lat, lng: lng, schedule: '', responsible: '', details: '' }, true, false, isTransfer, isBin, isLarge);
         }
 
         function editLocation(id) {
@@ -1633,8 +1662,9 @@
                 const isRoute = id.toString().startsWith('route_');
                 const isTransfer = id.toString().startsWith('transfer_');
                 const isBin = id.toString().startsWith('bin_');
+                const isLarge = id.toString().startsWith('large_');
                 if (isRoute && loc.details && loc.details.toString().startsWith('[')) { loc.lat = loc.details; loc.details = ''; }
-                renderForm(loc, false, isRoute, isTransfer, isBin);
+                renderForm(loc, false, isRoute, isTransfer, isBin, isLarge);
             }
         }
 
@@ -1644,11 +1674,12 @@
             else { input.classList.add('hidden'); }
         };
 
-        function renderForm(data, isNew, isRouteMode, isTransferMode = false, isBinMode = false) {
+        function renderForm(data, isNew, isRouteMode, isTransferMode = false, isBinMode = false, isLargeMode = false) {
             const isTransfer = isTransferMode || (data && data.id && data.id.toString().startsWith('transfer_'));
             const isBin = isBinMode || (data && data.id && data.id.toString().startsWith('bin_'));
-            const title = isNew ? (isRouteMode ? 'บันทึกเส้นทางใหม่' : (isTransfer ? 'เพิ่มจุดพักขยะใหม่' : (isBin ? 'เพิ่มจุดเก็บขยะในหมู่บ้าน' : 'เพิ่มจุดจัดเก็บใหม่'))) : (isTransfer ? 'แก้ไขจุดพักขยะ' : (isBin ? 'แก้ไขจุดในหมู่บ้าน' : 'แก้ไขข้อมูล'));
-            const iconHtml = isRouteMode ? '<i class="fa-solid fa-route text-blue-500 mr-2 mt-1"></i>' : (isTransfer ? '<i class="fa-solid fa-dumpster text-purple-600 mr-2 mt-1"></i>' : (isBin ? `<div class="w-5 h-5 text-pink-500 mr-2 shrink-0 mt-0.5">${SVG_BIN_ICON}</div>` : '<i class="fa-solid fa-pen-to-square text-amber-500 mr-2 mt-1"></i>'));
+            const isLarge = isLargeMode || (data && data.id && data.id.toString().startsWith('large_'));
+            const title = isNew ? (isRouteMode ? 'บันทึกเส้นทางใหม่' : (isTransfer ? 'เพิ่มจุดพักขยะใหม่' : (isBin ? 'เพิ่มจุดเก็บขยะในหมู่บ้าน' : (isLarge ? 'เพิ่มจุดเก็บขยะชิ้นใหญ่' : 'เพิ่มจุดจัดเก็บใหม่')))) : (isTransfer ? 'แก้ไขจุดพักขยะ' : (isBin ? 'แก้ไขจุดในหมู่บ้าน' : (isLarge ? 'แก้ไขจุดขยะชิ้นใหญ่' : 'แก้ไขข้อมูล')));
+            const iconHtml = isRouteMode ? '<i class="fa-solid fa-route text-blue-500 mr-2 mt-1"></i>' : (isTransfer ? '<i class="fa-solid fa-dumpster text-purple-600 mr-2 mt-1"></i>' : (isBin ? `<div class="w-5 h-5 text-pink-500 mr-2 shrink-0 mt-0.5">${SVG_BIN_ICON}</div>` : (isLarge ? '<i class="fa-solid fa-couch text-rose-700 mr-2 mt-1"></i>' : '<i class="fa-solid fa-pen-to-square text-amber-500 mr-2 mt-1"></i>')));
             const parsed = parseLocationName(data.name); const currentZone = parsed.zone; const currentName = isNew ? '' : parsed.name;
             const uniqueZones = new Set(['ทั่วไป']);
             locationsData.forEach(loc => { const p = parseLocationName(loc.name); if (p.zone) uniqueZones.add(p.zone); });
@@ -1673,7 +1704,7 @@
                         <select id="f_zone_select" class="w-full border-b-2 border-gray-300 px-2 py-1 bg-white focus:border-emerald-500 outline-none transition font-medium text-gray-800 rounded shadow-sm" onchange="window.toggleNewZoneInput()">${zoneOptions}</select>
                         <input type="text" id="f_zone_new" placeholder="พิมพ์ชื่อกลุ่มใหม่ที่ต้องการ..." class="w-full border-b-2 border-emerald-400 px-2 py-2 mt-2 bg-transparent outline-none transition font-medium text-emerald-800 hidden">
                     </div>
-                    <div><label class="block text-gray-700 mb-1 text-xs font-medium">ชื่อ${isRouteMode ? 'เส้นทาง' : (isTransfer ? 'จุดพักขยะ' : (isBin ? 'จุดเก็บในหมู่บ้าน' : 'สถานที่'))} *</label><input type="text" id="f_name" value="${currentName}" placeholder="${isTransfer ? 'เช่น จุดพักขยะหลักซอย 3' : (isBin ? 'เช่น ถังขยะซอย 1' : 'เช่น ซอย 1')}" required class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
+                    <div><label class="block text-gray-700 mb-1 text-xs font-medium">ชื่อ${isRouteMode ? 'เส้นทาง' : (isTransfer ? 'จุดพักขยะ' : (isBin ? 'จุดเก็บในหมู่บ้าน' : (isLarge ? 'จุดเก็บชิ้นใหญ่' : 'สถานที่')))} *</label><input type="text" id="f_name" value="${currentName}" placeholder="${isTransfer ? 'เช่น จุดพักขยะหลักซอย 3' : (isBin ? 'เช่น ถังขยะซอย 1' : (isLarge ? 'เช่น ลานทิ้งของชิ้นใหญ่ ซอย 2' : 'เช่น ซอย 1'))}" required class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                     <div><label class="block text-gray-700 mb-1 text-xs font-medium">วันเวลาจัดเก็บ *</label><input type="text" id="f_schedule" value="${data.schedule}" placeholder="เช่น จันทร์,พุธ 08:00น." required class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                     <div><label class="block text-gray-700 mb-1 text-xs font-medium">ชื่อผู้รับผิดชอบ</label><input type="text" id="f_responsible" value="${data.responsible}" class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none"></div>
                     <div><label class="block text-gray-700 mb-1 text-xs font-medium">รายละเอียดเพิ่มเติม</label><textarea id="f_details" rows="2" class="w-full border px-3 py-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-emerald-500 outline-none">${(data.details && data.details.toString().startsWith('[')) ? '' : (data.details || '')}</textarea></div>
@@ -1692,6 +1723,7 @@
                 if (isRoute) finalId = 'route_' + Date.now();
                 else if (adminAction === 'transfer') finalId = 'transfer_' + Date.now();
                 else if (adminAction === 'bin') finalId = 'bin_' + Date.now();
+                else if (adminAction === 'large') finalId = 'large_' + Date.now();
                 else finalId = Date.now().toString();
             }
             let zoneVal = document.getElementById('f_zone_select').value; if (zoneVal === 'NEW_ZONE') zoneVal = document.getElementById('f_zone_new').value.trim();
