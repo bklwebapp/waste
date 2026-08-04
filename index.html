@@ -52,11 +52,29 @@
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* ปุ่มลอย Feedback */
-        .feedback-float-btn {
+        /* คอนเทนเนอร์ปุ่มลอย */
+        .float-buttons-wrapper {
             position: fixed;
             bottom: 24px;
+            z-index: 900;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            gap: 12px;
+            transition: left 0.3s ease, right 0.3s ease, bottom 0.3s ease;
+        }
+        .float-buttons-wrapper.side-left {
             left: 24px;
+            right: auto;
+        }
+        .float-buttons-wrapper.side-right {
+            right: 24px;
+            left: auto;
+        }
+
+        /* ปุ่มลอย Feedback */
+        .feedback-float-btn {
+            position: relative;
             z-index: 900;
             width: 52px;
             height: 52px;
@@ -84,7 +102,6 @@
         }
         .feedback-float-btn .feedback-tooltip {
             position: absolute;
-            left: 60px;
             top: 50%;
             transform: translateY(-50%);
             background: #1e1b4b;
@@ -98,13 +115,13 @@
             transition: opacity 0.3s;
             font-family: 'Kanit', sans-serif;
         }
+        .side-left .feedback-tooltip { left: 60px; right: auto; }
+        .side-right .feedback-tooltip { right: 60px; left: auto; }
         .feedback-float-btn:hover .feedback-tooltip { opacity: 1; }
 
         /* ปุ่มลอย Traffy Fondue */
         .traffy-float-btn {
-            position: fixed;
-            bottom: 88px;
-            left: 24px;
+            position: relative;
             z-index: 900;
             width: 52px;
             height: 52px;
@@ -147,7 +164,6 @@
         }
         .traffy-float-btn .traffy-tooltip {
             position: absolute;
-            left: 60px;
             top: 50%;
             transform: translateY(-50%);
             background: #4e342e;
@@ -161,6 +177,8 @@
             transition: opacity 0.3s;
             font-family: 'Kanit', sans-serif;
         }
+        .side-left .traffy-tooltip { left: 60px; right: auto; }
+        .side-right .traffy-tooltip { right: 60px; left: auto; }
         .traffy-float-btn:hover .traffy-tooltip { opacity: 1; }
 
         /* Feedback star rating */
@@ -266,9 +284,12 @@
                         <i class="fa-solid fa-chart-line"></i> สถิติผู้เข้าชม
                     </button>
                 </div>
-                <div class="grid grid-cols-1 gap-2 text-xs">
+                <div class="grid grid-cols-2 gap-2 text-xs">
                     <button onclick="openFeedbackAdmin()" class="w-full py-2 bg-white border border-indigo-400 text-indigo-600 rounded hover:bg-indigo-50 transition font-medium shadow-sm">
                         <i class="fa-solid fa-inbox"></i> ดูข้อเสนอแนะ <span id="feedbackBadge" class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full ml-1 hidden">0</span>
+                    </button>
+                    <button onclick="toggleFloatSide(event)" class="w-full py-2 bg-white border border-amber-400 text-amber-800 rounded hover:bg-amber-50 transition font-medium shadow-sm flex items-center justify-center gap-1 truncate" title="สลับตำแหน่งไอคอนลอย (ซ้าย/ขวา)">
+                        <i class="fa-solid fa-arrows-left-right text-amber-600"></i> ย้ายไอคอน: <span id="adminBannerFloatSideText" class="font-bold text-amber-700">ซ้าย</span>
                     </button>
                 </div>
                 <button id="btnFinishRoute" onclick="showRouteForm()" class="hidden py-2 bg-emerald-500 text-white rounded hover:bg-emerald-600 transition text-sm shadow mt-1">
@@ -284,18 +305,26 @@
                 <i class="fa-solid fa-location-crosshairs text-lg group-hover:scale-110 transition-transform"></i>
             </button>
 
-            <!-- ปุ่มลอย Traffy Fondue -->
-            <a href="https://page.line.me/traffyfondue" target="_blank" onclick="logTraffyClick()" id="btnTraffyFloat" class="traffy-float-btn" title="Traffy Fondue">
-                <i class="fa-solid fa-bullhorn"></i>
-                <span class="tf-text">Fondue</span>
-                <span class="traffy-tooltip">แจ้งปัญหาผ่าน Traffy Fondue</span>
-            </a>
+            <!-- คอนเทนเนอร์ปุ่มลอย (Traffy Fondue & Feedback) -->
+            <div id="floatButtonsWrapper" class="float-buttons-wrapper side-left select-none">
+                <!-- ปุ่มสลับฝั่ง (แสดงเฉพาะเมื่ออยู่ในโหมด Admin) -->
+                <button id="btnFloatSideToggle" onclick="toggleFloatSide(event)" class="hidden absolute -top-8 left-1/2 -translate-x-1/2 bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-medium px-2.5 py-0.5 rounded-full shadow-lg border border-amber-300 transition flex items-center gap-1 cursor-grab active:cursor-grabbing z-10 whitespace-nowrap" title="คลิกหรือลากเพื่อย้ายฝั่ง (ซ้าย/ขวา)">
+                    <i class="fa-solid fa-arrows-left-right text-[10px]"></i> <span id="floatHandleText">ย้ายไปขวา</span>
+                </button>
 
-            <!-- ปุ่มลอยส่งข้อเสนอแนะ -->
-            <button id="btnFeedbackFloat" class="feedback-float-btn" onclick="openFeedbackModal()" title="ส่งข้อเสนอแนะ">
-                <i class="fa-solid fa-comment-dots"></i>
-                <span class="feedback-tooltip">ส่งข้อเสนอแนะ / คำติชม</span>
-            </button>
+                <!-- ปุ่มลอยส่งข้อเสนอแนะ -->
+                <button id="btnFeedbackFloat" class="feedback-float-btn" onclick="openFeedbackModal(event)" title="ส่งข้อเสนอแนะ">
+                    <i class="fa-solid fa-comment-dots"></i>
+                    <span class="feedback-tooltip">ส่งข้อเสนอแนะ / คำติชม</span>
+                </button>
+
+                <!-- ปุ่มลอย Traffy Fondue -->
+                <a href="https://page.line.me/traffyfondue" target="_blank" onclick="logTraffyClick(event)" id="btnTraffyFloat" class="traffy-float-btn" title="Traffy Fondue">
+                    <i class="fa-solid fa-bullhorn"></i>
+                    <span class="tf-text">Fondue</span>
+                    <span class="traffy-tooltip">แจ้งปัญหาผ่าน Traffy Fondue</span>
+                </a>
+            </div>
             <div id="infoPanel" class="info-panel fixed md:absolute bottom-0 md:bottom-auto md:top-4 md:right-4 w-full md:w-80 bg-white rounded-t-2xl md:rounded-xl shadow-2xl transform translate-y-full md:translate-y-0 md:opacity-0 md:pointer-events-none transition-all duration-300 max-h-[85vh] overflow-y-auto flex flex-col z-[500]">
                 <div class="w-full flex justify-center pt-3 pb-1 md:hidden" onclick="closePanel()"><div class="w-12 h-1.5 bg-gray-300 rounded-full"></div></div>
                 <div class="p-5 flex-1" id="panelContent"></div>
@@ -667,11 +696,122 @@
             { id: 'fb4', name: 'ลุงประสิทธิ์', category: 'คำติชม', message: 'เส้นทางรถขยะสาย A ควรเพิ่มรอบช่วงเย็นด้วยครับ ตอนเย็นคนทิ้งขยะเยอะ', rating: 3, date: '2026-05-24 16:45' }
         ];
 
+        // ======================= ระบบสลับตำแหน่งไอคอนลอย (ซ้าย / ขวา) =======================
+        const FLOAT_SIDE_KEY = 'garbage_map_float_side';
+        let currentFloatSide = localStorage.getItem(FLOAT_SIDE_KEY) || 'left';
+        let wasFloatDragged = false;
+
+        function applyFloatButtonsSide(side) {
+            if (side !== 'left' && side !== 'right') side = 'left';
+            currentFloatSide = side;
+            localStorage.setItem(FLOAT_SIDE_KEY, side);
+
+            const wrapper = document.getElementById('floatButtonsWrapper');
+            const locateBtn = document.getElementById('btnLocateUser');
+            const sideText = document.getElementById('adminBannerFloatSideText');
+            const handleText = document.getElementById('floatHandleText');
+
+            if (wrapper) {
+                if (side === 'right') {
+                    wrapper.classList.remove('side-left');
+                    wrapper.classList.add('side-right');
+                    wrapper.style.left = 'auto';
+                    wrapper.style.right = '24px';
+                } else {
+                    wrapper.classList.remove('side-right');
+                    wrapper.classList.add('side-left');
+                    wrapper.style.right = 'auto';
+                    wrapper.style.left = '24px';
+                }
+            }
+
+            if (locateBtn) {
+                locateBtn.style.bottom = side === 'right' ? '156px' : '90px';
+            }
+
+            if (sideText) {
+                sideText.innerText = side === 'right' ? 'ขวา' : 'ซ้าย';
+            }
+            if (handleText) {
+                handleText.innerText = side === 'right' ? 'ย้ายไปซ้าย' : 'ย้ายไปขวา';
+            }
+        }
+
+        function toggleFloatSide(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            const newSide = currentFloatSide === 'left' ? 'right' : 'left';
+            applyFloatButtonsSide(newSide);
+            showToast(`ย้ายตำแหน่งไอคอนลอยไปฝั่ง${newSide === 'right' ? 'ขวา' : 'ซ้าย'}แล้ว`);
+        }
+
+        function initFloatDrag() {
+            const wrapper = document.getElementById('floatButtonsWrapper');
+            const handle = document.getElementById('btnFloatSideToggle');
+            if (!wrapper) return;
+
+            let isDragging = false;
+            let startX = 0;
+
+            function onStart(e) {
+                if (!isAdminMode) return;
+                isDragging = true;
+                wasFloatDragged = false;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                startX = clientX;
+                wrapper.style.transition = 'none';
+            }
+
+            function onMove(e) {
+                if (!isDragging || !isAdminMode) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const diffX = clientX - startX;
+                if (Math.abs(diffX) > 8) {
+                    wasFloatDragged = true;
+                }
+                if (wasFloatDragged) {
+                    const newLeft = clientX - 26;
+                    wrapper.style.left = `${Math.max(10, Math.min(window.innerWidth - 65, newLeft))}px`;
+                    wrapper.style.right = 'auto';
+                }
+            }
+
+            function onEnd(e) {
+                if (!isDragging) return;
+                isDragging = false;
+                wrapper.style.transition = '';
+
+                if (wasFloatDragged) {
+                    const endX = e.changedTouches ? e.changedTouches[0].clientX : (e.clientX || startX);
+                    const newSide = endX > (window.innerWidth / 2) ? 'right' : 'left';
+                    applyFloatButtonsSide(newSide);
+                    showToast(`ย้ายตำแหน่งไอคอนลอยไปฝั่ง${newSide === 'right' ? 'ขวา' : 'ซ้าย'}แล้ว`);
+                    setTimeout(() => { wasFloatDragged = false; }, 100);
+                } else {
+                    applyFloatButtonsSide(currentFloatSide);
+                }
+            }
+
+            if (handle) {
+                handle.addEventListener('mousedown', onStart);
+                handle.addEventListener('touchstart', onStart, { passive: true });
+            }
+            wrapper.addEventListener('mousedown', onStart);
+            wrapper.addEventListener('touchstart', onStart, { passive: true });
+
+            document.addEventListener('mousemove', onMove);
+            document.addEventListener('touchmove', onMove, { passive: true });
+
+            document.addEventListener('mouseup', onEnd);
+            document.addEventListener('touchend', onEnd);
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             initMap();             
             checkAdminSession();   
             loadData();
             logVisit(); // บันทึกสถิติเมื่อหน้าเว็บโหลด
+            applyFloatButtonsSide(currentFloatSide);
+            initFloatDrag();
         });
 
         // ======================= ระบบสถิติผู้เข้าชม (เพิ่มใหม่) =======================
@@ -691,7 +831,11 @@
             } catch(e) {}
         }
         
-        async function logTraffyClick() {
+        async function logTraffyClick(e) {
+            if (wasFloatDragged) {
+                if (e) e.preventDefault();
+                return false;
+            }
             if (!GAS_URL) return; 
             try {
                 await fetch(GAS_URL, { 
@@ -1557,12 +1701,15 @@
 
         function updateAdminUI() {
             const btn = document.getElementById('adminToggle'); const banner = document.getElementById('adminBanner');
+            const floatToggleBtn = document.getElementById('btnFloatSideToggle');
             if (isAdminMode) {
                 btn.classList.replace('bg-emerald-700', 'bg-amber-500'); btn.classList.replace('hover:bg-emerald-800', 'hover:bg-amber-600');
                 banner.classList.remove('hidden'); setMode('point');
+                if (floatToggleBtn) floatToggleBtn.classList.remove('hidden');
             } else {
                 btn.classList.replace('bg-amber-500', 'bg-emerald-700'); btn.classList.replace('hover:bg-amber-600', 'hover:bg-emerald-800');
                 banner.classList.add('hidden');
+                if (floatToggleBtn) floatToggleBtn.classList.add('hidden');
                 if (currentTempMarker) map.removeLayer(currentTempMarker); if (tempPolyline) map.removeLayer(tempPolyline);
                 currentTempMarker = null;
             }
@@ -1838,7 +1985,11 @@
 
         // ======================= ระบบข้อเสนอแนะและคำติชม =======================
 
-        function openFeedbackModal() {
+        function openFeedbackModal(e) {
+            if (wasFloatDragged) {
+                if (e) e.preventDefault();
+                return;
+            }
             // Reset form
             document.getElementById('fb_name').value = '';
             document.getElementById('fb_category').selectedIndex = 0;
