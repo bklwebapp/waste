@@ -1143,7 +1143,7 @@
             currentPopupIndex = 0;
 
             activePopups.forEach((p, index) => {
-                carousel.innerHTML += `<div class="w-full flex-shrink-0 flex justify-center items-center h-full"><img src="${p.imageUrl}" class="max-w-full max-h-[80vh] object-contain rounded" alt="Popup Announcement" onerror="this.src='https://via.placeholder.com/600x400?text=Image+Not+Found'"></div>`;
+                carousel.innerHTML += `<div class="w-full flex-shrink-0 flex justify-center items-center h-full"><img src="${p.imageUrl}" referrerpolicy="no-referrer" class="max-w-full max-h-[80vh] object-contain rounded" alt="Popup Announcement" onerror="this.src='https://via.placeholder.com/600x400?text=Image+Not+Found'"></div>`;
                 indicators.innerHTML += `<button onclick="goToPopup(${index})" class="w-2.5 h-2.5 rounded-full transition-all shadow-md ${index === 0 ? 'bg-white w-5' : 'bg-white/50 hover:bg-white/80'}" id="dot-${index}"></button>`;
             });
 
@@ -1211,7 +1211,7 @@
                 const displayDates = normalizeDates(p.dates); 
                 html += `
                     <div class="bg-white p-3 rounded-lg border border-purple-100 shadow-sm flex items-center gap-3 relative overflow-hidden group hover:border-purple-300 transition">
-                        <img src="${p.imageUrl}" class="w-20 h-14 object-cover rounded bg-gray-100" onerror="this.src='https://via.placeholder.com/80x56?text=X'">
+                        <img src="${p.imageUrl}" referrerpolicy="no-referrer" class="w-20 h-14 object-cover rounded bg-gray-100" onerror="this.src='https://via.placeholder.com/80x56?text=X'">
                         <div class="flex-1 min-w-0">
                             <div class="text-[10px] text-purple-600 font-bold mb-0.5"><i class="fa-regular fa-calendar mr-1"></i> วันที่แสดงผล</div>
                             <div class="text-xs text-gray-700 truncate" title="${displayDates}">${displayDates || 'ไม่ได้ระบุวัน'}</div>
